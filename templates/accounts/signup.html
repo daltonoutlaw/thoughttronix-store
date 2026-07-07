@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-sm">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h1 class="card-title text-2xl">Sign up</h1>
+        <p class="text-sm opacity-70">Create an account. Your thoughts, our business.</p>
+
+        <form method="post" action="{% url 'accounts:signup' %}" class="mt-4 space-y-4">
+          {% csrf_token %}
+
+          {% for error in form.non_field_errors %}
+            <div class="alert alert-error" role="alert"><span>{{ error }}</span></div>
+          {% endfor %}
+
+          {% for field in form %}
+            <div>
+              <label class="label mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}
+                <div class="mt-1 text-xs opacity-60">{{ field.help_text }}</div>
+              {% endif %}
+              {% for error in field.errors %}
+                <p class="mt-1 text-sm text-error">{{ error }}</p>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          <button type="submit" class="btn btn-primary w-full">Create account</button>
+        </form>
+
+        <p class="mt-4 text-center text-sm opacity-70">
+          Already have an account?
+          <a href="{% url 'accounts:login' %}" class="link link-primary">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -7,8 +7,26 @@ grows with the project; tests never invoke the seed command.
 from decimal import Decimal
 
 import pytest
+from django.contrib.auth import get_user_model
 
 from products.models import Category, Product, Tag
+
+
+@pytest.fixture
+def customer(db):
+    return get_user_model().objects.create_user(
+        username="customer", password="customer123"
+    )
+
+
+@pytest.fixture
+def staff_user(db):
+    return get_user_model().objects.create_user(
+        username="employee",
+        password="employee123",
+        is_staff=True,
+        job_title="Junior Thought Curator",
+    )
 
 
 @pytest.fixture

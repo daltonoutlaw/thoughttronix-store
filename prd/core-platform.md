@@ -31,7 +31,7 @@ Pages are enhanced with HTMX where a full-page reload would feel clumsy — most
 3. As a visitor, I can browse products by category.
 4. As a visitor, I can search products by name and description text.
 5. As a visitor, I can filter the catalog by tag, and combine filtering with search.
-6. As a visitor, I can sign up for a customer account with a username, email, and password.
+6. As a visitor, I can sign up for a customer account with a username and password (no email — Django's stock signup fields).
 7. As a visitor, I am prompted to sign in when I attempt to add a product to a cart.
 
 **Customer (signed in)**

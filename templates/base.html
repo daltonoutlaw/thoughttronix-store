@@ -15,13 +15,33 @@
             🧠 ThoughtTronix
           </a>
         </div>
-        <div class="navbar-end">
-          {# Auth links arrive in Phase 3; the cart badge in Phase 4. #}
+        <div class="navbar-end gap-2">
+          {# The cart badge arrives in Phase 4. #}
+          {% if user.is_authenticated %}
+            <span class="text-sm opacity-70">Hi, {{ user.username }}</span>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm">Sign in</a>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-sm">Sign up</a>
+          {% endif %}
         </div>
       </nav>
     </header>
 
     <main class="container mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       {% block content %}{% endblock %}
     </main>
 
