@@ -43,10 +43,10 @@
 3. Product detail page at slug URLs; category browse pages; app-namespaced named URLs throughout (`products:detail`).
 4. Search (`icontains` over name and description), tag filtering, category filtering — composing via querystring per the PRD. Pagination at 12.
 5. Designed empty states: no search results, empty category.
-6. The `seed` management command, v1: destructive and idempotent per the PRD; 5–6 categories, tags, 25–30 products with brand-voice copy, the three demo logins (`admin`, `employee`, `customer`) and 8–10 background customers. No carts or orders yet — those arrive with their phases.
+6. The `seed` management command, v1: destructive and idempotent per the PRD; 6 categories, tags, 30–35 products with brand-voice copy, the three demo logins (`admin`, `employee`, `customer`) and 8–10 background customers. No carts or orders yet — those arrive with their phases.
 7. Admin list displays and search fields for catalog models.
 
-**Verification.** *Automated:* model behavior tests (manager, `__str__`, slug uniqueness), view smoke tests, search/filter/pagination tests, seed-runs-twice idempotence test. *Manual:* seed, browse all categories, search "Seraphine," filter by a tag, walk pages 1→2→3, view a Legacy Products page and confirm SoulSear is appropriately discontinued.
+**Verification.** *Automated:* model behavior tests (manager, `__str__`, slug uniqueness), view smoke tests, search/filter/pagination tests, seed-runs-twice idempotence test. *Manual:* seed, browse all categories, search "Seraphine," filter by a tag, walk pages 1→2→3, view the Defense page and confirm the SoulSear Mark I is appropriately recalled.
 
 **Out of bounds:** anything requiring login. The catalog is a public reading room.
 

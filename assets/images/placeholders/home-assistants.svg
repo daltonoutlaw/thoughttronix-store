@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img">
+  <rect width="400" height="300" fill="#141824"/>
+  <circle cx="200" cy="130" r="72" fill="#26314e"/>
+  <circle cx="200" cy="130" r="90" fill="none" stroke="#26314e" stroke-opacity="0.4" stroke-width="2"/>
+  <text x="200" y="156" font-size="68" text-anchor="middle">🏠</text>
+  <text x="200" y="262" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" letter-spacing="7" text-anchor="middle" fill="#4a5470">THOUGHTTRONIX</text>
+</svg>

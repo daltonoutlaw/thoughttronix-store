@@ -1,25 +1,127 @@
 {% extends "base.html" %}
+{% load humanize static %}
 
-{% block title %}Catalog — The ThoughtTronix Store{% endblock %}
+{% block title %}
+  {% if category %}{{ category.name }}{% else %}Catalog{% endif %} — The ThoughtTronix Store
+{% endblock %}
 
 {% block content %}
-  <h1 class="mb-6 text-3xl font-bold">The Catalog</h1>
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold">
+        {% if category %}{{ category.name }}{% else %}The Catalog{% endif %}
+      </h1>
+      <p class="mt-1 text-sm opacity-60">
+        {{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}
+        {% if search_query %}matching &ldquo;{{ search_query }}&rdquo;{% endif %}
+      </p>
+    </div>
+
+    <form method="get" action="" class="join">
+      {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}" />{% endif %}
+      <input
+        type="search"
+        name="q"
+        value="{{ search_query }}"
+        placeholder="Search the catalog…"
+        class="input join-item w-56"
+      />
+      <button type="submit" class="btn btn-primary join-item">Search</button>
+    </form>
+  </div>
+
+  {% if not category %}
+    <div class="mb-4 flex flex-wrap gap-2">
+      {% for cat in categories %}
+        <a href="{{ cat.get_absolute_url }}" class="badge badge-outline badge-lg hover:badge-primary">
+          {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if tags %}
+    <div class="mb-8 flex flex-wrap items-center gap-2 text-sm">
+      <span class="opacity-60">Tags:</span>
+      <a href="{% querystring tag=None page=None %}"
+         class="badge {% if not active_tag %}badge-primary{% else %}badge-ghost{% endif %}">
+        all
+      </a>
+      {% for tag in tags %}
+        <a href="{% querystring tag=tag.slug page=None %}"
+           class="badge {% if active_tag == tag.slug %}badge-primary{% else %}badge-ghost{% endif %}">
+          {{ tag.name }}
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {% for product in products %}
-      <div class="card bg-base-100 shadow-md">
+      <div class="card bg-base-100 shadow-md transition-shadow hover:shadow-xl">
+        <figure>
+          <a href="{{ product.get_absolute_url }}">
+            <img src="{% static product.category.placeholder_image %}" alt="{{ product.name }}" />
+          </a>
+        </figure>
         <div class="card-body">
-          <h2 class="card-title">{{ product.name }}</h2>
-          <div>
+          <h2 class="card-title">
+            <a href="{{ product.get_absolute_url }}" class="link-hover">{{ product.name }}</a>
+          </h2>
+          <div class="flex flex-wrap gap-2">
             <span class="badge badge-outline">{{ product.category.name }}</span>
+            {% if not product.is_available %}
+              <span class="badge badge-warning badge-outline">Unavailable</span>
+            {% endif %}
           </div>
-          <p class="text-lg font-semibold text-primary">${{ product.price }}</p>
+          {% if product.tagline %}
+            <p class="text-sm italic opacity-70">{{ product.tagline }}</p>
+          {% endif %}
+          <p class="text-lg font-semibold text-primary">${{ product.price|intcomma }}</p>
         </div>
       </div>
     {% empty %}
-      <p class="col-span-full py-12 text-center opacity-70">
-        The shelves are empty. Our thoughts are with you.
-      </p>
+      <div class="col-span-full py-16 text-center">
+        {% if search_query %}
+          <p class="text-5xl">🔍</p>
+          <p class="mt-4 text-xl font-semibold">Nothing matches &ldquo;{{ search_query }}&rdquo;</p>
+          <p class="mt-2 opacity-70">Try thinking different thoughts. We'll know.</p>
+          <a href="{% querystring q=None tag=None page=None %}" class="btn btn-primary btn-sm mt-6">
+            Clear search
+          </a>
+        {% elif category %}
+          <p class="text-5xl">🗄️</p>
+          <p class="mt-4 text-xl font-semibold">This shelf is empty</p>
+          <p class="mt-2 opacity-70">Nothing here. For now.</p>
+          <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-sm mt-6">
+            Back to the catalog
+          </a>
+        {% else %}
+          <p class="text-5xl">🧠</p>
+          <p class="mt-4 text-xl font-semibold">The shelves are empty</p>
+          <p class="mt-2 opacity-70">Our thoughts are with you.</p>
+        {% endif %}
+      </div>
     {% endfor %}
   </div>
+
+  {% if is_paginated %}
+    <div class="mt-10 flex justify-center">
+      <div class="join">
+        {% if page_obj.has_previous %}
+          <a href="{% querystring page=page_obj.previous_page_number %}" class="btn join-item">«</a>
+        {% else %}
+          <button class="btn join-item btn-disabled">«</button>
+        {% endif %}
+        <button class="btn join-item pointer-events-none">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </button>
+        {% if page_obj.has_next %}
+          <a href="{% querystring page=page_obj.next_page_number %}" class="btn join-item">»</a>
+        {% else %}
+          <button class="btn join-item btn-disabled">»</button>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 {% endblock %}

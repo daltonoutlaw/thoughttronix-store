@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load humanize static %}
+
+{% block title %}{{ product.name }} — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="breadcrumbs mb-6 text-sm">
+    <ul>
+      <li><a href="{% url 'products:catalog' %}">Catalog</a></li>
+      <li><a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></li>
+      <li>{{ product.name }}</li>
+    </ul>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+    <figure class="overflow-hidden rounded-box bg-base-100 shadow-md">
+      <img src="{% static product.category.placeholder_image %}" alt="{{ product.name }}" class="w-full" />
+    </figure>
+
+    <div>
+      <h1 class="text-4xl font-bold">{{ product.name }}</h1>
+      {% if product.tagline %}
+        <p class="mt-2 text-lg italic opacity-70">{{ product.tagline }}</p>
+      {% endif %}
+
+      <p class="mt-6 text-3xl font-semibold text-primary">${{ product.price|intcomma }}</p>
+
+      <div class="mt-4">
+        {% if product.is_available %}
+          <span class="badge badge-success badge-outline">In stock</span>
+        {% else %}
+          <span class="badge badge-warning badge-outline">Unavailable</span>
+        {% endif %}
+      </div>
+
+      {% if product.description %}
+        <div class="prose mt-6 max-w-none text-base-content">
+          <p>{{ product.description|linebreaksbr }}</p>
+        </div>
+      {% endif %}
+
+      {% if product.tags.all %}
+        <div class="mt-8 flex flex-wrap items-center gap-2">
+          {% for tag in product.tags.all %}
+            <a href="{% url 'products:catalog' %}?tag={{ tag.slug }}" class="badge badge-ghost hover:badge-primary">
+              #{{ tag.name }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
