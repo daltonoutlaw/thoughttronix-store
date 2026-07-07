@@ -1,0 +1,13 @@
+"""URL configuration for the ThoughtTronix Store.
+
+Every URL is named and every app has a namespace (e.g. ``products:catalog``).
+Public catalog URLs use slugs; back-office URLs use pks.
+"""
+
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("products.urls")),
+]

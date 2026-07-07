@@ -1,0 +1,35 @@
+{% load tailwind_cli %}
+<!doctype html>
+<html lang="en" data-theme="night">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}The ThoughtTronix Store{% endblock %}</title>
+    {% tailwind_css %}
+  </head>
+  <body class="flex min-h-screen flex-col bg-base-200">
+    <header>
+      <nav class="navbar bg-base-100 shadow-sm">
+        <div class="navbar-start">
+          <a class="btn btn-ghost text-xl" href="{% url 'products:catalog' %}">
+            🧠 ThoughtTronix
+          </a>
+        </div>
+        <div class="navbar-end">
+          {# Auth links arrive in Phase 3; the cart badge in Phase 4. #}
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer footer-center bg-base-100 p-6 text-base-content">
+      <aside>
+        <p class="font-semibold">ThoughtTronix</p>
+        <p class="italic opacity-70">Your Thoughts, Our Business.</p>
+      </aside>
+    </footer>
+  </body>
+</html>

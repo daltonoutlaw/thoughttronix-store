@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Environment
+.env
+
+# Django
+db.sqlite3
+staticfiles/
+
+# Tailwind (downloaded CLI binary and compiled CSS)
+.django_tailwind_cli/
+assets/css/tailwind.css
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/

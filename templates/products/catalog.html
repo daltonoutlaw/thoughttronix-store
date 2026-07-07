@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Catalog — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <h1 class="mb-6 text-3xl font-bold">The Catalog</h1>
+
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for product in products %}
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body">
+          <h2 class="card-title">{{ product.name }}</h2>
+          <div>
+            <span class="badge badge-outline">{{ product.category.name }}</span>
+          </div>
+          <p class="text-lg font-semibold text-primary">${{ product.price }}</p>
+        </div>
+      </div>
+    {% empty %}
+      <p class="col-span-full py-12 text-center opacity-70">
+        The shelves are empty. Our thoughts are with you.
+      </p>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,72 @@
+# CLAUDE.md — The ThoughtTronix Store
+
+A server-rendered Django 6 storefront and back office. The PRD
+(`prd/core-platform.md`) owns the requirements; the plan
+(`plans/core-platform.md`) owns the sequence. Where they speak, do not
+improvise alternatives.
+
+## Commands
+
+- `uv sync` — install dependencies (Python 3.13, managed by uv)
+- `uv run python manage.py migrate` — apply migrations
+- `uv run python manage.py tailwind runserver` — dev server + Tailwind watch
+- `uv run python manage.py tailwind build` — compile production CSS
+- `uv run pytest` — run the test suite
+- `uv run ruff check .` and `uv run ruff format .` — lint and format
+
+## Project layout
+
+- `config/` — the project package (settings, root urls)
+- `accounts/` — custom user model (`accounts.User`, `AbstractUser` + nullable
+  `job_title`). Roles are Django's own vocabulary: customers are plain users,
+  employees are `is_staff`, the admin is `is_superuser`. No role field, no Groups.
+- `products/` — catalog: `Category`, `Product`
+- `orders/` — cart, checkout, orders (arrives Phase 4–5)
+- `dashboard/` — staff analytics (arrives Phase 7)
+- `templates/` — project-level templates (`base.html`); app templates live in
+  `templates/<app>/`
+- `assets/` — static sources; `assets/css/source.css` is the Tailwind input,
+  `assets/css/tailwind.css` is compiled output (gitignored, never edit)
+
+## Architecture convention
+
+Logic lives in models and managers; cross-model workflows get a service
+module; views stay thin.
+
+Idiomatic Django throughout: class-based views, model methods, custom
+managers/querysets, forms own their validation. Settings read from `.env`
+via environs with working defaults — the app must run with no `.env` present.
+
+## Template conventions
+
+- Every page extends the project-level `templates/base.html` (DaisyUI navbar,
+  footer motto). DaisyUI theme: `night`, set in `assets/css/source.css` and
+  `data-theme` on `<html>`.
+- HTMX endpoints render partials from `templates/<app>/partials/_<name>.html` —
+  prefixed with an underscore, never extending `base.html`.
+- Every list view gets a designed empty state, not a blank page.
+- Styling is Tailwind + DaisyUI classes only; no crispy-forms, no JavaScript
+  beyond HTMX.
+
+## URL conventions
+
+- Every URL is named; every app has a namespace (`products:catalog`,
+  `orders:checkout`).
+- Public catalog URLs use slugs (`/products/seraphine-home-hub/`);
+  back-office URLs use pks.
+- `Product` defines `get_absolute_url`.
+
+## Testing
+
+pytest + pytest-django. Shared fixtures live in the project-level
+`conftest.py` — plain fixtures, no factory-boy. Tests never invoke the seed
+command. The suite must be green at every phase boundary.
+
+## Phase discipline
+
+- One phase per session; execute the phase asked for and do not run ahead.
+- Every phase ends green and demoable: tests pass, Ruff clean, manual QA by
+  a human before committing.
+- One commit range per phase, messages prefixed `phase-N:`. The git history
+  is a teaching artifact; keep it clean.
+- Clear context between phases.
