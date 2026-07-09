@@ -9,6 +9,7 @@ from decimal import Decimal
 import pytest
 from django.contrib.auth import get_user_model
 
+from orders.models import Cart, CartItem
 from products.models import Category, Product, Tag
 
 
@@ -61,3 +62,13 @@ def unavailable_product(category):
 @pytest.fixture
 def tag(db):
     return Tag.objects.create(name="bestseller", slug="bestseller")
+
+
+@pytest.fixture
+def cart(customer):
+    return Cart.for_user(customer)
+
+
+@pytest.fixture
+def cart_item(cart, product):
+    return CartItem.objects.create(cart=cart, product=product, quantity=2)

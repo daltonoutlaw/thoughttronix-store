@@ -1,0 +1,20 @@
+{# The add-to-cart control, in all its states. Include with #}
+{# in_cart=<quantity already in the cart>; the signed-in button is an HTMX #}
+{# swap that re-renders this partial with oob_badge for the navbar badge. #}
+{% if not product.is_available %}
+  <button class="btn btn-outline btn-sm" disabled>Unavailable</button>
+{% elif user.is_authenticated %}
+  <button
+    hx-post="{% url 'orders:add' product.pk %}"
+    hx-swap="outerHTML"
+    class="btn btn-primary btn-sm">
+    {% if in_cart %}In cart ({{ in_cart }}) — add another{% else %}Add to cart{% endif %}
+  </button>
+{% else %}
+  {# Anonymous visitors are prompted to sign in — a plain link, no HTMX. #}
+  <a href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+     class="btn btn-primary btn-sm">
+    Add to cart
+  </a>
+{% endif %}
+{% if oob_badge %}{% include "orders/partials/_cart_badge.html" with oob=True %}{% endif %}

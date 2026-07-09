@@ -8,9 +8,9 @@ Demo logins (documented in the README):
 
     admin / admin123        superuser
     employee / employee123  staff, "Junior Thought Curator"
-    customer / customer123  a plain customer
+    customer / customer123  a plain customer, with a live cart
 
-Carts and orders arrive with their phases.
+Orders arrive with Phase 5.
 """
 
 from decimal import Decimal
@@ -20,6 +20,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
 
+from orders.models import Cart
 from products.models import Category, Product, Tag
 
 TAGS = [
@@ -458,6 +459,13 @@ BACKGROUND_CUSTOMERS = [
     ("rmalik", "Rafi", "Malik"),
 ]
 
+# The customer demo login's live cart: (product slug, quantity).
+CUSTOMER_CART = [
+    ("seraphine-home-hub", 2),
+    ("travel-faraday-case", 1),
+    ("whisper-alarm-clock", 1),
+]
+
 
 class Command(BaseCommand):
     help = "Wipe and rebuild the demo world: catalog, tags, and demo accounts."
@@ -468,18 +476,21 @@ class Command(BaseCommand):
         tags = self._create_tags()
         self._create_catalog(tags)
         self._create_users()
+        self._create_customer_cart()
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"Seeded {Category.objects.count()} categories, "
                 f"{Tag.objects.count()} tags, "
                 f"{Product.objects.count()} products, "
-                f"{get_user_model().objects.count()} users."
+                f"{get_user_model().objects.count()} users, "
+                f"and a live cart for 'customer'."
             )
         )
 
     def _wipe(self):
         """Remove everything the seed owns; the rebuild starts from zero."""
+        Cart.objects.all().delete()
         Product.objects.all().delete()
         Tag.objects.all().delete()
         Category.objects.all().delete()
@@ -535,3 +546,9 @@ class Command(BaseCommand):
             )
             user.set_unusable_password()
             user.save()
+
+    def _create_customer_cart(self):
+        customer = get_user_model().objects.get(username="customer")
+        cart = Cart.for_user(customer)
+        for slug, quantity in CUSTOMER_CART:
+            cart.items.create(product=Product.objects.get(slug=slug), quantity=quantity)

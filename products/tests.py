@@ -8,6 +8,8 @@ from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.html import escape
 
+from orders.models import CartItem
+
 from .models import Category, Product, Tag
 
 # --- Model behavior -------------------------------------------------------
@@ -215,6 +217,7 @@ def test_seed_builds_the_demo_world(db):
     assert employee.is_staff and not employee.is_superuser
     assert employee.job_title == "Junior Thought Curator"
     assert not customer.is_staff
+    assert customer.cart.item_count() == 4
 
     mark_one = Product.objects.get(slug="soulsear-mark-i")
     assert not mark_one.is_available
@@ -228,6 +231,7 @@ def test_seed_is_idempotent(db):
         Tag.objects.count(),
         Product.objects.count(),
         get_user_model().objects.count(),
+        CartItem.objects.count(),
     )
 
     call_command("seed")
@@ -236,6 +240,7 @@ def test_seed_is_idempotent(db):
         Tag.objects.count(),
         Product.objects.count(),
         get_user_model().objects.count(),
+        CartItem.objects.count(),
     )
 
     assert first == second

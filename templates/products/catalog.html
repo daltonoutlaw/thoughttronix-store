@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load humanize static %}
+{% load cart_extras humanize static %}
 
 {% block title %}
   {% if category %}{{ category.name }}{% else %}Catalog{% endif %} — The ThoughtTronix Store
@@ -77,7 +77,10 @@
           {% if product.tagline %}
             <p class="text-sm italic opacity-70">{{ product.tagline }}</p>
           {% endif %}
-          <p class="text-lg font-semibold text-primary">${{ product.price|intcomma }}</p>
+          <div class="card-actions items-center justify-between">
+            <p class="text-lg font-semibold text-primary">${{ product.price|intcomma }}</p>
+            {% include "orders/partials/_add_button.html" with in_cart=cart_quantities|quantity_of:product.pk %}
+          </div>
         </div>
       </div>
     {% empty %}

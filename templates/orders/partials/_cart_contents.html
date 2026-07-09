@@ -1,0 +1,73 @@
+{% load humanize %}
+{# The cart's line items and summary — swapped whole into #cart-contents #}
+{# by the quantity and removal endpoints, with the navbar badge OOB. #}
+{% if cart.lines %}
+  <div class="overflow-x-auto rounded-box bg-base-100 shadow-md">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th class="text-right">Line total</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart.lines %}
+          <tr>
+            <td>
+              <a href="{{ item.product.get_absolute_url }}" class="link-hover font-semibold">
+                {{ item.product.name }}
+              </a>
+            </td>
+            <td>${{ item.product.price|intcomma }}</td>
+            <td>
+              <div class="join">
+                {% if item.quantity > 1 %}
+                  <button class="btn btn-sm join-item"
+                          hx-post="{% url 'orders:decrement' item.pk %}"
+                          hx-target="#cart-contents"
+                          aria-label="Decrease quantity">−</button>
+                {% else %}
+                  <button class="btn btn-sm join-item" disabled aria-label="Decrease quantity">−</button>
+                {% endif %}
+                <span class="btn btn-sm join-item pointer-events-none">{{ item.quantity }}</span>
+                <button class="btn btn-sm join-item"
+                        hx-post="{% url 'orders:increment' item.pk %}"
+                        hx-target="#cart-contents"
+                        aria-label="Increase quantity">+</button>
+              </div>
+            </td>
+            <td class="text-right font-semibold">${{ item.line_total|intcomma }}</td>
+            <td class="text-right">
+              <button class="btn btn-ghost btn-sm text-error"
+                      hx-post="{% url 'orders:remove' item.pk %}"
+                      hx-target="#cart-contents">
+                Remove
+              </button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center justify-end gap-6">
+    <p class="text-xl font-semibold">
+      Total: <span class="text-primary">${{ cart.total|intcomma }}</span>
+    </p>
+    {# Checkout arrives in Phase 5; the button holds its place. #}
+    <button class="btn btn-primary" disabled>Checkout — coming soon</button>
+  </div>
+{% else %}
+  <div class="py-16 text-center">
+    <p class="text-5xl">🛒</p>
+    <p class="mt-4 text-xl font-semibold">Your cart is empty</p>
+    <p class="mt-2 opacity-70">Your thoughts are worth spending on.</p>
+    <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-sm mt-6">
+      Browse the catalog
+    </a>
+  </div>
+{% endif %}
+{% if oob_badge %}{% include "orders/partials/_cart_badge.html" with oob=True %}{% endif %}

@@ -1,4 +1,4 @@
-{% load tailwind_cli %}
+{% load static tailwind_cli %}
 <!doctype html>
 <html lang="en" data-theme="night">
   <head>
@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}The ThoughtTronix Store{% endblock %}</title>
     {% tailwind_css %}
+    {# htmx 2.0.6, vendored — version-pinned static file, no CDN. #}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
   </head>
-  <body class="flex min-h-screen flex-col bg-base-200">
+  <body class="flex min-h-screen flex-col bg-base-200"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <header>
       <nav class="navbar bg-base-100 shadow-sm">
         <div class="navbar-start">
@@ -16,8 +19,8 @@
           </a>
         </div>
         <div class="navbar-end gap-2">
-          {# The cart badge arrives in Phase 4. #}
           {% if user.is_authenticated %}
+            {% include "orders/partials/_cart_badge.html" %}
             <span class="text-sm opacity-70">Hi, {{ user.username }}</span>
             <form method="post" action="{% url 'accounts:logout' %}">
               {% csrf_token %}

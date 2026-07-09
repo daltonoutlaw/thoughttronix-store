@@ -1,0 +1,11 @@
+{# The navbar cart link. Include with oob=True to swap it out-of-band #}
+{# from an HTMX response; the count comes from the cart context processor. #}
+<a href="{% url 'orders:cart' %}"
+   id="cart-badge"
+   class="btn btn-ghost btn-sm indicator"
+   {% if oob %}hx-swap-oob="true"{% endif %}>
+  🛒 Cart
+  {% if cart_item_count %}
+    <span class="badge badge-primary badge-sm indicator-item">{{ cart_item_count }}</span>
+  {% endif %}
+</a>
