@@ -1,0 +1,4 @@
+{# The order status as a DaisyUI badge, colored by state. #}
+<span class="badge {% if order.status == 'DELIVERED' %}badge-success{% elif order.status == 'SHIPPED' %}badge-info{% elif order.status == 'CANCELLED' %}badge-error{% else %}badge-neutral{% endif %}">
+  {{ order.get_status_display }}
+</span>

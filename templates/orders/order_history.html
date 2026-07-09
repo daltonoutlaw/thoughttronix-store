@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Your Orders — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <h1 class="text-3xl font-bold">Your Orders</h1>
+
+  {% if orders %}
+    <div class="mt-6 overflow-x-auto rounded-box bg-base-100 shadow-md">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Placed</th>
+            <th>Status</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td>
+                <a href="{% url 'orders:detail' order.pk %}" class="link-hover font-mono font-semibold">
+                  {{ order.number }}
+                </a>
+              </td>
+              <td>{{ order.created_at|date:"M j, Y" }}</td>
+              <td>{% include "orders/partials/_status_badge.html" %}</td>
+              <td class="text-right font-semibold">${{ order.total|intcomma }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="py-16 text-center">
+      <p class="text-5xl">📦</p>
+      <p class="mt-4 text-xl font-semibold">No orders yet</p>
+      <p class="mt-2 opacity-70">Everything you've ever wanted is one checkout away.</p>
+      <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-sm mt-6">
+        Browse the catalog
+      </a>
+    </div>
+  {% endif %}
+{% endblock %}

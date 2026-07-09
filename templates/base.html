@@ -20,6 +20,7 @@
         </div>
         <div class="navbar-end gap-2">
           {% if user.is_authenticated %}
+            <a href="{% url 'orders:history' %}" class="btn btn-ghost btn-sm">Orders</a>
             {% include "orders/partials/_cart_badge.html" %}
             <span class="text-sm opacity-70">Hi, {{ user.username }}</span>
             <form method="post" action="{% url 'accounts:logout' %}">

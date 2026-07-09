@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Order {{ order.number }} — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-lg py-8 text-center">
+    <p class="text-6xl">🧠</p>
+    <h1 class="mt-4 text-3xl font-bold">Thank you for your thoughts.</h1>
+    <p class="mt-2 opacity-70">Your order has been placed and is already on our mind.</p>
+
+    <div class="card mt-8 bg-base-100 shadow-md">
+      <div class="card-body items-center">
+        <p class="text-sm uppercase tracking-wide opacity-60">Order number</p>
+        <p class="font-mono text-2xl font-bold text-primary">{{ order.number }}</p>
+        <p class="mt-2">
+          {{ order.items.count }} item{{ order.items.count|pluralize }}
+          · <span class="font-semibold">${{ order.total|intcomma }}</span>
+          · card ending {{ order.card_last4 }}
+        </p>
+        <p class="text-sm opacity-70">A confirmation will reach {{ order.email }} eventually.</p>
+      </div>
+    </div>
+
+    <div class="mt-8 flex justify-center gap-4">
+      <a href="{% url 'orders:detail' order.pk %}" class="btn btn-primary">View order</a>
+      <a href="{% url 'products:catalog' %}" class="btn btn-ghost">Keep browsing</a>
+    </div>
+  </div>
+{% endblock %}

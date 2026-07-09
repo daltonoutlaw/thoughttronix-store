@@ -22,4 +22,12 @@ urlpatterns = [
         views.RemoveCartItemView.as_view(),
         name="remove",
     ),
+    path("checkout/", views.CheckoutView.as_view(), name="checkout"),
+    path("orders/", views.OrderHistoryView.as_view(), name="history"),
+    path("orders/<int:pk>/", views.OrderDetailView.as_view(), name="detail"),
+    path(
+        "orders/<int:pk>/confirmation/",
+        views.OrderConfirmationView.as_view(),
+        name="confirmation",
+    ),
 ]

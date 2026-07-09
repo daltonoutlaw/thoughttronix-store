@@ -1,19 +1,24 @@
-"""Cart views — thin per the architecture convention.
+"""Cart and checkout views — thin per the architecture convention.
 
 The three HTMX interactions of the core live here: add-to-cart, quantity
 change, and line removal. Each renders a partial (never ``base.html``);
 the responses carry the navbar badge as an out-of-band swap via the
-``oob_badge`` context flag.
+``oob_badge`` context flag. Checkout is conventional full-page work:
+validate the form, hand everything to ``place_order``.
 """
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from products.models import Product
 
-from .models import Cart, CartItem
+from .forms import CheckoutForm
+from .models import Cart, CartItem, Order
+from .services import place_order
 
 
 class CartView(LoginRequiredMixin, TemplateView):
@@ -77,3 +82,73 @@ class DecrementCartItemView(CartItemActionView):
 class RemoveCartItemView(CartItemActionView):
     def act(self, item):
         item.delete()
+
+
+class CheckoutView(LoginRequiredMixin, FormView):
+    """The single checkout page: validate the form, hand off to the service.
+
+    A cart that can't check out (empty, or holding a product that has
+    since become unavailable) is sent back to the cart page to be fixed —
+    ``place_order`` enforces the same rules transactionally as the
+    backstop.
+    """
+
+    template_name = "orders/checkout.html"
+    form_class = CheckoutForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        cart = Cart.for_user(request.user)
+        if not cart.items.exists():
+            messages.info(request, "Your cart is empty — add something first.")
+            return redirect("orders:cart")
+        unavailable = [
+            line.product.name for line in cart.lines() if not line.product.is_available
+        ]
+        if unavailable:
+            messages.warning(
+                request,
+                f"No longer available: {', '.join(unavailable)}. "
+                "Remove them from the cart to check out.",
+            )
+            return redirect("orders:cart")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cart"] = Cart.for_user(self.request.user)
+        return context
+
+    def form_valid(self, form):
+        cart = Cart.for_user(self.request.user)
+        order = place_order(cart, self.request.user, form.cleaned_data)
+        messages.success(self.request, f"Order {order.number} placed. Thank you!")
+        return redirect(reverse("orders:confirmation", kwargs={"pk": order.pk}))
+
+
+class OwnOrdersMixin(LoginRequiredMixin):
+    """Orders are always fetched through the owner — never by bare pk."""
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+
+class OrderConfirmationView(OwnOrdersMixin, DetailView):
+    template_name = "orders/confirmation.html"
+    context_object_name = "order"
+
+
+class OrderHistoryView(OwnOrdersMixin, ListView):
+    """The customer's orders, most recent first per the model ordering."""
+
+    template_name = "orders/order_history.html"
+    context_object_name = "orders"
+
+
+class OrderDetailView(OwnOrdersMixin, DetailView):
+    template_name = "orders/order_detail.html"
+    context_object_name = "order"
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("items")

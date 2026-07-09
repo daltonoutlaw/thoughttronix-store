@@ -57,8 +57,7 @@
     <p class="text-xl font-semibold">
       Total: <span class="text-primary">${{ cart.total|intcomma }}</span>
     </p>
-    {# Checkout arrives in Phase 5; the button holds its place. #}
-    <button class="btn btn-primary" disabled>Checkout — coming soon</button>
+    <a href="{% url 'orders:checkout' %}" class="btn btn-primary">Checkout</a>
   </div>
 {% else %}
   <div class="py-16 text-center">

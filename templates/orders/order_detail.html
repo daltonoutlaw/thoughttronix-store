@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Order {{ order.number }} — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <h1 class="font-mono text-3xl font-bold">{{ order.number }}</h1>
+    {% include "orders/partials/_status_badge.html" %}
+  </div>
+  <p class="mt-1 opacity-70">
+    Placed {{ order.created_at|date:"F j, Y" }} · card ending {{ order.card_last4 }}
+  </p>
+
+  <div class="mt-6 overflow-x-auto rounded-box bg-base-100 shadow-md">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price at purchase</th>
+          <th>Quantity</th>
+          <th class="text-right">Line total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+          <tr>
+            <td class="font-semibold">
+              {% if item.product %}
+                <a href="{{ item.product.get_absolute_url }}" class="link-hover">
+                  {{ item.product_name }}
+                </a>
+              {% else %}
+                {{ item.product_name }}
+              {% endif %}
+            </td>
+            <td>${{ item.unit_price|intcomma }}</td>
+            <td>{{ item.quantity }}</td>
+            <td class="text-right font-semibold">${{ item.line_total|intcomma }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mt-6 grid gap-6 sm:grid-cols-2">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title text-base">Shipped to</h2>
+        <address class="text-sm not-italic opacity-80">
+          {{ order.shipping_name }}<br>
+          {{ order.shipping_street }}<br>
+          {% if order.shipping_line2 %}{{ order.shipping_line2 }}<br>{% endif %}
+          {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}
+        </address>
+      </div>
+    </div>
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body items-end justify-center">
+        <p class="text-sm uppercase tracking-wide opacity-60">Order total</p>
+        <p class="text-3xl font-bold text-primary">${{ order.total|intcomma }}</p>
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'orders:history' %}" class="btn btn-ghost btn-sm mt-8">← All orders</a>
+{% endblock %}

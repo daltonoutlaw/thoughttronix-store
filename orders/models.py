@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 from products.models import Product
 
@@ -75,3 +76,84 @@ class CartItem(models.Model):
         if self.quantity > 1:
             self.quantity -= 1
             self.save()
+
+
+class Order(models.Model):
+    """A placed order — a snapshot, never a live view of the catalog.
+
+    Addresses are flat denormalized fields: the order must not change if
+    the customer later edits anything. Of the card, only the last four
+    digits survive checkout.
+    """
+
+    class Status(models.TextChoices):
+        PLACED = "PLACED", "Placed"
+        SHIPPED = "SHIPPED", "Shipped"
+        DELIVERED = "DELIVERED", "Delivered"
+        CANCELLED = "CANCELLED", "Cancelled"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="orders",
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PLACED
+    )
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    email = models.EmailField()
+
+    shipping_name = models.CharField(max_length=100)
+    shipping_street = models.CharField(max_length=200)
+    shipping_line2 = models.CharField(max_length=200, blank=True)
+    shipping_city = models.CharField(max_length=100)
+    shipping_state = models.CharField(max_length=2)
+    shipping_zip = models.CharField(max_length=10)
+
+    billing_name = models.CharField(max_length=100)
+    billing_street = models.CharField(max_length=200)
+    billing_line2 = models.CharField(max_length=200, blank=True)
+    billing_city = models.CharField(max_length=100)
+    billing_state = models.CharField(max_length=2)
+    billing_zip = models.CharField(max_length=10)
+
+    card_last4 = models.CharField(max_length=4)
+
+    # default (not auto_now_add) so the seed can backdate orders.
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.number
+
+    @property
+    def number(self):
+        """The customer-facing order number, e.g. ``TT-2026-00042``."""
+        return f"TT-{self.created_at.year}-{self.pk:05d}"
+
+
+class OrderItem(models.Model):
+    """One line of an order, priced as of purchase time.
+
+    Name and unit price are denormalized: order history must not change
+    when the catalog does. The product FK survives for linking while the
+    product exists.
+    """
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_name = models.CharField(max_length=200)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField()
+
+    class Meta:
+        ordering = ["pk"]
+
+    def __str__(self):
+        return f"{self.quantity} × {self.product_name}"
+
+    @property
+    def line_total(self):
+        return self.unit_price * self.quantity

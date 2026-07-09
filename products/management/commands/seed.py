@@ -8,19 +8,20 @@ Demo logins (documented in the README):
 
     admin / admin123        superuser
     employee / employee123  staff, "Junior Thought Curator"
-    customer / customer123  a plain customer, with a live cart
-
-Orders arrive with Phase 5.
+    customer / customer123  a plain customer, with order history and a live cart
 """
 
+import random
+from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 from django.utils.text import slugify
 
-from orders.models import Cart
+from orders.models import Cart, Order, OrderItem
 from products.models import Category, Product, Tag
 
 TAGS = [
@@ -466,6 +467,32 @@ CUSTOMER_CART = [
     ("whisper-alarm-clock", 1),
 ]
 
+# The customer demo login's visible order history: (days ago, status,
+# [(product slug, quantity), ...]). Statuses follow age, like the
+# background orders, plus one recent order still in flight.
+CUSTOMER_ORDERS = [
+    (124, Order.Status.DELIVERED, [("mindsync-solo", 1), ("charging-pillow", 1)]),
+    (47, Order.Status.DELIVERED, [("dreamcatch-sleep-recorder", 1)]),
+    (9, Order.Status.SHIPPED, [("seraphine-mini", 2), ("seraphine-wall-mount", 1)]),
+    (2, Order.Status.PLACED, [("napcap", 1)]),
+]
+
+# Background orders spread across the trailing six months so the Phase 7
+# dashboard has a real time axis. 48 here + 4 above = 52 total.
+BACKGROUND_ORDER_COUNT = 48
+
+# Shipping addresses for the background orders. US-only, like checkout.
+SEED_ADDRESSES = [
+    ("214 Synapse Street", "Canyon", "TX", "79015"),
+    ("77 Cortex Lane", "Amarillo", "TX", "79101"),
+    ("1500 Dendrite Drive", "Albuquerque", "NM", "87102"),
+    ("9 Axon Avenue", "Norman", "OK", "73019"),
+    ("410 Myelin Way", "Wichita", "KS", "67202"),
+    ("28 Ganglion Court", "Denver", "CO", "80202"),
+]
+
+CARD_LAST4S = ["4242", "4111", "1881", "0005"]
+
 
 class Command(BaseCommand):
     help = "Wipe and rebuild the demo world: catalog, tags, and demo accounts."
@@ -477,6 +504,7 @@ class Command(BaseCommand):
         self._create_catalog(tags)
         self._create_users()
         self._create_customer_cart()
+        self._create_orders()
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -484,12 +512,14 @@ class Command(BaseCommand):
                 f"{Tag.objects.count()} tags, "
                 f"{Product.objects.count()} products, "
                 f"{get_user_model().objects.count()} users, "
+                f"{Order.objects.count()} orders, "
                 f"and a live cart for 'customer'."
             )
         )
 
     def _wipe(self):
         """Remove everything the seed owns; the rebuild starts from zero."""
+        Order.objects.all().delete()
         Cart.objects.all().delete()
         Product.objects.all().delete()
         Tag.objects.all().delete()
@@ -552,3 +582,93 @@ class Command(BaseCommand):
         cart = Cart.for_user(customer)
         for slug, quantity in CUSTOMER_CART:
             cart.items.create(product=Product.objects.get(slug=slug), quantity=quantity)
+
+    def _create_orders(self):
+        """Order history: 4 visible orders for 'customer', 48 background.
+
+        A seeded RNG keeps every run identical (the idempotence
+        contract). Statuses follow age — old orders are delivered,
+        recent ones are still moving, and about one in ten was
+        cancelled along the way.
+        """
+        rng = random.Random(2026)
+        now = timezone.now()
+        User = get_user_model()
+
+        customer = User.objects.get(username="customer")
+        for days_ago, status, lines in CUSTOMER_ORDERS:
+            self._build_order(
+                user=customer,
+                created_at=now - timedelta(days=days_ago, hours=rng.randint(1, 12)),
+                status=status,
+                lines=[
+                    (Product.objects.get(slug=slug), quantity)
+                    for slug, quantity in lines
+                ],
+                rng=rng,
+            )
+
+        background = list(
+            User.objects.filter(
+                username__in=[username for username, *_ in BACKGROUND_CUSTOMERS]
+            ).order_by("username")
+        )
+        # Defense sales close offline, over handshakes — a single SoulSear
+        # would also flatten every other product on the revenue chart.
+        pool = list(
+            Product.objects.available()
+            .exclude(category__slug="defense")
+            .order_by("slug")
+        )
+        for _ in range(BACKGROUND_ORDER_COUNT):
+            days_ago = rng.randint(0, 182)
+            if rng.random() < 0.1:
+                status = Order.Status.CANCELLED
+            elif days_ago > 14:
+                status = Order.Status.DELIVERED
+            else:
+                status = rng.choice([Order.Status.PLACED, Order.Status.SHIPPED])
+            self._build_order(
+                user=rng.choice(background),
+                created_at=now - timedelta(days=days_ago, hours=rng.randint(1, 23)),
+                status=status,
+                lines=[
+                    (product, rng.randint(1, 2))
+                    for product in rng.sample(pool, rng.randint(1, 3))
+                ],
+                rng=rng,
+            )
+
+    def _build_order(self, *, user, created_at, status, lines, rng):
+        """One order with denormalized addresses and purchase-time prices."""
+        street, city, state, zip_code = rng.choice(SEED_ADDRESSES)
+        name = f"{user.first_name} {user.last_name}"
+        order = Order.objects.create(
+            user=user,
+            status=status,
+            total=sum(
+                (product.price * quantity for product, quantity in lines),
+                Decimal("0.00"),
+            ),
+            email=user.email,
+            shipping_name=name,
+            shipping_street=street,
+            shipping_city=city,
+            shipping_state=state,
+            shipping_zip=zip_code,
+            billing_name=name,
+            billing_street=street,
+            billing_city=city,
+            billing_state=state,
+            billing_zip=zip_code,
+            card_last4=rng.choice(CARD_LAST4S),
+            created_at=created_at,
+        )
+        for product, quantity in lines:
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                product_name=product.name,
+                unit_price=product.price,
+                quantity=quantity,
+            )
