@@ -1,0 +1,90 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+
+{% block title %}Orders — Back office{% endblock %}
+
+{% block backoffice %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+    <h2 class="text-xl font-semibold">
+      {{ page_obj.paginator.count }} order{{ page_obj.paginator.count|pluralize }}
+    </h2>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="opacity-60">Status:</span>
+      <a href="{% querystring status=None page=None %}"
+         class="badge {% if not active_status %}badge-primary{% else %}badge-ghost{% endif %}">
+        all
+      </a>
+      {% for value, label in statuses %}
+        <a href="{% querystring status=value page=None %}"
+           class="badge {% if active_status == value %}badge-primary{% else %}badge-ghost{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if orders %}
+    <div class="overflow-x-auto rounded-box bg-base-100 shadow-md">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Placed</th>
+            <th>Status</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td>
+                <a href="{% url 'orders:manage_order_detail' order.pk %}"
+                   class="link-hover font-mono font-semibold">{{ order.number }}</a>
+              </td>
+              <td>{{ order.user.username }}</td>
+              <td>{{ order.created_at|date:"M j, Y" }}</td>
+              <td>{% include "orders/partials/_status_badge.html" %}</td>
+              <td class="text-right font-semibold">${{ order.total|intcomma }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <div class="mt-8 flex justify-center">
+        <div class="join">
+          {% if page_obj.has_previous %}
+            <a href="{% querystring page=page_obj.previous_page_number %}" class="btn join-item">«</a>
+          {% else %}
+            <button class="btn join-item btn-disabled">«</button>
+          {% endif %}
+          <button class="btn join-item pointer-events-none">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </button>
+          {% if page_obj.has_next %}
+            <a href="{% querystring page=page_obj.next_page_number %}" class="btn join-item">»</a>
+          {% else %}
+            <button class="btn join-item btn-disabled">»</button>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="py-16 text-center">
+      {% if active_status %}
+        <p class="text-5xl">🗂️</p>
+        <p class="mt-4 text-xl font-semibold">No orders with that status</p>
+        <p class="mt-2 opacity-70">They're all somewhere else in the pipeline.</p>
+        <a href="{% querystring status=None page=None %}" class="btn btn-primary btn-sm mt-6">
+          Show all orders
+        </a>
+      {% else %}
+        <p class="text-5xl">📦</p>
+        <p class="mt-4 text-xl font-semibold">No orders yet</p>
+        <p class="mt-2 opacity-70">The customers are still thinking. We'd know.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

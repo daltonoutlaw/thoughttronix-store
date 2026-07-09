@@ -14,9 +14,10 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
+from accounts.mixins import StaffRequiredMixin
 from products.models import Product
 
-from .forms import CheckoutForm
+from .forms import CheckoutForm, OrderStatusForm
 from .models import Cart, CartItem, Order
 from .services import place_order
 
@@ -152,3 +153,63 @@ class OrderDetailView(OwnOrdersMixin, DetailView):
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("items")
+
+
+# --- The back office --------------------------------------------------------
+#
+# Staff-only order oversight: every customer's orders, filterable by
+# status, with the status dropdown on the detail page. The ``section``
+# context entry drives the active tab in the staff shell.
+
+
+class ManageOrderListView(StaffRequiredMixin, ListView):
+    """All orders, most recent first, filterable via ``?status=``."""
+
+    template_name = "orders/manage_orders.html"
+    context_object_name = "orders"
+    paginate_by = 20
+    extra_context = {"section": "orders"}
+
+    def get_queryset(self):
+        orders = Order.objects.select_related("user")
+        status = self.request.GET.get("status", "")
+        if status in Order.Status.values:
+            orders = orders.filter(status=status)
+        return orders
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["statuses"] = Order.Status.choices
+        context["active_status"] = self.request.GET.get("status", "")
+        return context
+
+
+class ManageOrderDetailView(StaffRequiredMixin, DetailView):
+    """Any order's detail, with the status form alongside."""
+
+    template_name = "orders/manage_order_detail.html"
+    context_object_name = "order"
+    queryset = Order.objects.select_related("user").prefetch_related("items")
+    extra_context = {"section": "orders"}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["status_form"] = OrderStatusForm(instance=self.object)
+        return context
+
+
+class UpdateOrderStatusView(StaffRequiredMixin, View):
+    """POST-only: set an order's status from the back-office dropdown."""
+
+    def post(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+        form = OrderStatusForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                f"{order.number} is now {order.get_status_display().lower()}.",
+            )
+        else:
+            messages.error(request, "That isn't a status an order can have.")
+        return redirect("orders:manage_order_detail", pk=order.pk)

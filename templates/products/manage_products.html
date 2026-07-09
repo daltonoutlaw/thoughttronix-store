@@ -1,0 +1,68 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+
+{% block title %}Products — Back office{% endblock %}
+
+{% block backoffice %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+    <h2 class="text-xl font-semibold">
+      {{ products|length }} product{{ products|length|pluralize }}
+    </h2>
+    <a href="{% url 'products:manage_product_create' %}" class="btn btn-primary btn-sm">
+      + Add product
+    </a>
+  </div>
+
+  {% if products %}
+    <div class="overflow-x-auto rounded-box bg-base-100 shadow-md">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Availability</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+            <tr>
+              <td>
+                <a href="{% url 'products:manage_product_update' product.pk %}"
+                   class="link-hover font-semibold">{{ product.name }}</a>
+                {% if product.tagline %}
+                  <p class="text-xs italic opacity-60">{{ product.tagline }}</p>
+                {% endif %}
+              </td>
+              <td>{{ product.category.name }}</td>
+              <td>${{ product.price|intcomma }}</td>
+              <td>
+                {% if product.is_available %}
+                  <span class="badge badge-success badge-outline">Available</span>
+                {% else %}
+                  <span class="badge badge-warning badge-outline">Unavailable</span>
+                {% endif %}
+              </td>
+              <td class="text-right">
+                <a href="{% url 'products:manage_product_update' product.pk %}"
+                   class="btn btn-ghost btn-xs">Edit</a>
+                <a href="{% url 'products:manage_product_delete' product.pk %}"
+                   class="btn btn-ghost btn-xs text-error">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="py-16 text-center">
+      <p class="text-5xl">🏷️</p>
+      <p class="mt-4 text-xl font-semibold">Nothing to sell yet</p>
+      <p class="mt-2 opacity-70">A store with no products is just a website.</p>
+      <a href="{% url 'products:manage_product_create' %}" class="btn btn-primary btn-sm mt-6">
+        Add the first product
+      </a>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "backoffice/base.html" %}
+
+{# Shared by category and tag create/edit; ``kind`` names which one. #}
+{% block title %}
+  {% if form.instance.pk %}Edit{% else %}New{% endif %} {{ kind }} — Back office
+{% endblock %}
+
+{% block backoffice %}
+  <div class="card mx-auto max-w-lg bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title">
+        {% if form.instance.pk %}Edit &ldquo;{{ form.instance.name }}&rdquo;{% else %}New {{ kind }}{% endif %}
+      </h2>
+      <form method="post" class="mt-2 space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+          {% include "products/partials/_field.html" %}
+        {% endfor %}
+        <div class="mt-2 flex items-center justify-end gap-2">
+          <a href="{% url 'products:manage_catalog' %}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save {{ kind }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

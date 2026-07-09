@@ -1,0 +1,25 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}Edit product{% else %}New product{% endif %} — Back office
+{% endblock %}
+
+{% block backoffice %}
+  <div class="card mx-auto max-w-2xl bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title">
+        {% if form.instance.pk %}Edit &ldquo;{{ form.instance.name }}&rdquo;{% else %}New product{% endif %}
+      </h2>
+      <form method="post" class="mt-2 space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+          {% include "products/partials/_field.html" %}
+        {% endfor %}
+        <div class="mt-2 flex items-center justify-end gap-2">
+          <a href="{% url 'products:manage_products' %}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

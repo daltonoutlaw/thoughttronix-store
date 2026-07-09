@@ -20,6 +20,11 @@
         </div>
         <div class="navbar-end gap-2">
           {% if user.is_authenticated %}
+            {% if user.is_staff %}
+              <a href="{% url 'products:manage_products' %}" class="btn btn-ghost btn-sm">
+                Back office
+              </a>
+            {% endif %}
             <a href="{% url 'orders:history' %}" class="btn btn-ghost btn-sm">Orders</a>
             {% include "orders/partials/_cart_badge.html" %}
             <span class="text-sm opacity-70">Hi, {{ user.username }}</span>

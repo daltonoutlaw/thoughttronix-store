@@ -1,0 +1,77 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}Categories &amp; tags — Back office{% endblock %}
+
+{% block backoffice %}
+  <div class="grid gap-8 lg:grid-cols-2">
+    <section>
+      <div class="mb-4 flex items-center justify-between gap-4">
+        <h2 class="text-xl font-semibold">Categories</h2>
+        <a href="{% url 'products:manage_category_create' %}" class="btn btn-primary btn-sm">
+          + Add category
+        </a>
+      </div>
+      <div class="overflow-x-auto rounded-box bg-base-100 shadow-md">
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Slug</th><th>Products</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+              <tr>
+                <td class="font-semibold">{{ category.name }}</td>
+                <td class="font-mono text-xs opacity-70">{{ category.slug }}</td>
+                <td>{{ category.product_count }}</td>
+                <td class="text-right">
+                  <a href="{% url 'products:manage_category_update' category.pk %}"
+                     class="btn btn-ghost btn-xs">Edit</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="py-8 text-center opacity-70">
+                  No categories yet — every product needs a shelf.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="mb-4 flex items-center justify-between gap-4">
+        <h2 class="text-xl font-semibold">Tags</h2>
+        <a href="{% url 'products:manage_tag_create' %}" class="btn btn-primary btn-sm">
+          + Add tag
+        </a>
+      </div>
+      <div class="overflow-x-auto rounded-box bg-base-100 shadow-md">
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Slug</th><th>Products</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for tag in tags %}
+              <tr>
+                <td class="font-semibold">{{ tag.name }}</td>
+                <td class="font-mono text-xs opacity-70">{{ tag.slug }}</td>
+                <td>{{ tag.product_count }}</td>
+                <td class="text-right">
+                  <a href="{% url 'products:manage_tag_update' tag.pk %}"
+                     class="btn btn-ghost btn-xs">Edit</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="py-8 text-center opacity-70">
+                  No tags yet — how will anyone filter?
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+{% endblock %}

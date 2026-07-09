@@ -30,4 +30,20 @@ urlpatterns = [
         views.OrderConfirmationView.as_view(),
         name="confirmation",
     ),
+    # Back office — staff-only, pk URLs per the URL conventions.
+    path(
+        "backoffice/orders/",
+        views.ManageOrderListView.as_view(),
+        name="manage_orders",
+    ),
+    path(
+        "backoffice/orders/<int:pk>/",
+        views.ManageOrderDetailView.as_view(),
+        name="manage_order_detail",
+    ),
+    path(
+        "backoffice/orders/<int:pk>/status/",
+        views.UpdateOrderStatusView.as_view(),
+        name="manage_order_status",
+    ),
 ]

@@ -11,6 +11,7 @@ to Week 5.
 from django import forms
 from django.core.validators import RegexValidator
 
+from .models import Order
 from .validators import validate_card_number, validate_expiry
 
 US_STATES = [
@@ -127,3 +128,16 @@ class CheckoutForm(forms.Form):
 
     def card_fields(self):
         return [self[name] for name in self.fields if name.startswith("card_")]
+
+
+class OrderStatusForm(forms.ModelForm):
+    """The back-office status dropdown — any of the four states, anytime.
+
+    Guarding the workflow (no un-cancelling, no re-shipping a delivered
+    order) is deliberately left as a student exercise.
+    """
+
+    class Meta:
+        model = Order
+        fields = ["status"]
+        widgets = {"status": forms.Select(attrs={"class": "select"})}
