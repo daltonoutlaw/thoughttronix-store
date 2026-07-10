@@ -19,10 +19,9 @@
     <a role="tab"
        class="tab {% if section == 'orders' %}tab-active{% endif %}"
        href="{% url 'orders:manage_orders' %}">Orders</a>
-    {# Dashboard arrives in Phase 7 — the tab is deliberately dead for now. #}
-    <span role="tab" class="tab cursor-not-allowed opacity-40" title="Coming soon">
-      Dashboard
-    </span>
+    <a role="tab"
+       class="tab {% if section == 'dashboard' %}tab-active{% endif %}"
+       href="{% url 'dashboard:index' %}">Dashboard</a>
   </div>
 
   {% block backoffice %}{% endblock %}

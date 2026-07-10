@@ -1,0 +1,117 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard — Back office{% endblock %}
+
+{% block backoffice %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-4">
+    <h2 class="text-xl font-semibold">Analytics</h2>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="opacity-60">Period:</span>
+      {% for key, label in periods %}
+        <a href="{% querystring period=key %}"
+           class="badge {% if active_period == key %}badge-primary{% else %}badge-ghost{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if store_has_sales %}
+    <div class="stats stats-vertical mb-8 w-full bg-base-100 shadow-md sm:stats-horizontal">
+      <div class="stat">
+        <div class="stat-title">Total revenue</div>
+        <div class="stat-value text-primary">${{ revenue|floatformat:2|intcomma }}</div>
+        <div class="stat-desc">{{ period_label|lower }}, excluding cancelled orders</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Orders</div>
+        <div class="stat-value">{{ order_count|intcomma }}</div>
+        <div class="stat-desc">{{ period_label|lower }}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-title">Average order value</div>
+        <div class="stat-value">${{ average_order_value|floatformat:2|intcomma }}</div>
+        <div class="stat-desc">revenue ÷ orders</div>
+      </div>
+    </div>
+
+    <div class="grid items-start gap-8 lg:grid-cols-5">
+      <div class="card bg-base-100 shadow-md lg:col-span-3">
+        <div class="card-body">
+          <h3 class="card-title text-base">
+            Revenue over time
+            <span class="text-sm font-normal opacity-60">by {{ bucket }}</span>
+          </h3>
+          {% if series %}
+            <div class="mt-2 space-y-1.5">
+              {% for point in series %}
+                <div class="flex items-center gap-3 text-xs tabular-nums">
+                  <span class="w-20 shrink-0 opacity-70">
+                    {% if bucket == "day" %}
+                      {{ point.bucket|date:"M j" }}
+                    {% elif bucket == "week" %}
+                      Wk of {{ point.bucket|date:"M j" }}
+                    {% else %}
+                      {{ point.bucket|date:"M Y" }}
+                    {% endif %}
+                  </span>
+                  <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-base-200">
+                    <div class="h-full rounded-full bg-primary"
+                         style="width: {% widthratio point.revenue max_revenue 100 %}%"></div>
+                  </div>
+                  <span class="w-20 shrink-0 text-right">${{ point.revenue|floatformat:2|intcomma }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="py-10 text-center opacity-70">
+              No sales in this period. The thoughts are pending.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-md lg:col-span-2">
+        <div class="card-body">
+          <h3 class="card-title text-base">Top products <span class="text-sm font-normal opacity-60">by revenue</span></h3>
+          {% if top_products %}
+            <table class="table table-sm mt-2">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Product</th>
+                  <th class="text-right">Units</th>
+                  <th class="text-right">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in top_products %}
+                  <tr>
+                    <td class="opacity-50">{{ forloop.counter }}</td>
+                    <td>{{ entry.product_name }}</td>
+                    <td class="text-right tabular-nums">{{ entry.units }}</td>
+                    <td class="text-right font-semibold tabular-nums">${{ entry.revenue|floatformat:2|intcomma }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="py-10 text-center opacity-70">
+              No sales in this period. The thoughts are pending.
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="py-16 text-center">
+      <p class="text-5xl">📈</p>
+      <p class="mt-4 text-xl font-semibold">No sales yet</p>
+      <p class="mt-2 opacity-70">
+        The dashboard wakes with the first order. Customers are out there,
+        thinking it over — we can tell.
+      </p>
+    </div>
+  {% endif %}
+{% endblock %}

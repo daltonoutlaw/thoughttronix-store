@@ -621,7 +621,9 @@ class Command(BaseCommand):
             .order_by("slug")
         )
         for _ in range(BACKGROUND_ORDER_COUNT):
-            days_ago = rng.randint(0, 182)
+            # Weighted toward today (business is good) so the dashboard's
+            # default 30-day view has enough bars to read as a chart.
+            days_ago = int(rng.triangular(0, 182, 0))
             if rng.random() < 0.1:
                 status = Order.Status.CANCELLED
             elif days_ago > 14:
