@@ -3,9 +3,8 @@
 Every rule is visible at its field declaration, in the style of data
 annotations: field types validate (``EmailField``), field arguments
 validate (``required``, ``max_length``, ``ChoiceField``), and the
-``validators=[...]`` list carries the rest. Deliberately no ``clean_*``
-methods and no cross-field ``clean()`` — imperative validation belongs
-to Week 5.
+``validators=[...]`` list carries the rest. No ``clean_*`` methods 
+and no ``clean()`` — none of its current rules need imperative validation.
 """
 
 from django import forms
