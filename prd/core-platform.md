@@ -83,7 +83,7 @@ Pages are enhanced with HTMX where a full-page reload would feel clumsy — most
 - Field arguments validate: `required` (the default), `max_length`, `ChoiceField` restricting state to the 50 US states + DC.
 - The `validators=[...]` list carries the rest: `RegexValidator` for ZIP (`^\d{5}(-\d{4})?$`) and CVV (`^\d{3,4}$`), and two custom validators defined in `orders/validators.py` — `validate_card_number` (a Luhn checksum; standard test numbers such as `4242424242424242` and `4111111111111111` pass) and `validate_expiry` (MM/YY, must be the current month or later).
 
-Custom validators are plain functions that raise `ValidationError` — small, pure, and unit-testable. No `clean_*` methods and no cross-field `clean()` on this form; imperative validation is deliberately left for students to meet in Week 5. A valid form always results in a successful order — no payment gateway, no processor, no network, ever. US-only shipping. The checkout view is thin: validate form → `place_order`.
+Custom validators are plain functions that raise `ValidationError` — small, pure, and unit-testable. No `clean_*` methods and no cross-field `clean()` on this form. A valid form always results in a successful order — no payment gateway, no processor, no network, ever. The checkout view is thin: validate form → `place_order`.
 
 **Architecture.** Idiomatic Django: class-based views, model methods, custom managers/querysets (e.g., `Product.objects.available()`), forms own their validation. Exactly two deliberate deep modules: (1) `orders/services.py` exposing `place_order(cart, user, checkout_data, *, coupon_code=None)` — creates the order and order items with denormalized prices and addresses, empties the cart, all-or-nothing in a transaction; the `coupon_code` parameter is a marked extension seam that the core accepts and ignores; (2) `dashboard/queries.py` holding the aggregation queries (`annotate`, `Count`, `Sum`) behind the analytics dashboard. Both deep modules carry docstrings and type hints on every public function — their interfaces are the product. Views stay thin everywhere.
 
@@ -99,7 +99,7 @@ Custom validators are plain functions that raise `ValidationError` — small, pu
 
 **Pagination and search.** `paginate_by = 12` on the catalog. Search is simple `icontains` over name and description; tag and category filters compose with search via querystring parameters.
 
-**Product images.** No file uploads and no media handling in the core (uploads arrive in Week 11). Each product displays a static placeholder image chosen by category; the `Product` model carries no image field.
+**Product images.** No file uploads and no media handling in the core platform (this arrives later). Each product displays a static placeholder image chosen by category; the `Product` model carries no image field.
 
 **Seed data.** A destructive, idempotent management command: `manage.py seed`. Wipes domain data and rebuilds the identical demo world: 30–35 products across 6 categories (Home Assistants — the Seraphine line, Neural Implants — the MindSync line, Neural Wearables, Accessories, Defense — home of the SoulSear directed-energy line, and Legacy Products), 40–60 orders spread across the trailing six months so the dashboard has a real time axis, and fixed demo logins documented in the README: `admin`/`admin123` (superuser), `employee`/`employee123` (staff, job title "Junior Thought Curator"), `customer`/`customer123` (with order history and a live cart), plus 8–10 background customers with orders. Product copy carries the brand voice ("She's always listening. In a good way."). Written as readable ORM Python — the seed file doubles as documentation.
 
@@ -107,7 +107,7 @@ Custom validators are plain functions that raise `ValidationError` — small, pu
 
 ## Testing Decisions
 
-pytest + pytest-django throughout. The suite must be green at every phase boundary and stay green at the `student-baseline` tag — students inherit *clone → tests green* as an invariant.
+pytest + pytest-django throughout
 
 Test data comes from shared pytest fixtures in a project-level `conftest.py` (a user, a staff user, a category with products, a cart with items). No factory-boy — plain fixtures keep the dependency surface small and the test setup readable. Tests never invoke the seed command.
 
@@ -123,18 +123,3 @@ Coverage priorities, in order:
 8. **The seed command** — runs twice without error, produces the same counts both times (the idempotence contract).
 
 No browser automation, no JavaScript testing: HTMX endpoints are tested as Django views returning partial HTML.
-
-## Out of Scope
-
-The following are deliberately excluded from this build. Several are planned future work with named owners (course weeks); their seams ship in this build, unused.
-
-- **Customer address book** — planned; Week 5 lab. Checkout addresses are typed fresh every time in the core; prefilling checkout from a saved address is the address book's integration point.
-- **Discount coupons** — planned; Week 5 homework. The `place_order` coupon seam ships now; no `Coupon` model, no checkout field.
-- **Wishlists** — planned; Week 6 homework.
-- **Product reviews and ratings** — planned; Week 8. Product pages ship with no rating display.
-- **Real payments** — never. A valid checkout form succeeds unconditionally; no processor, no network calls, no gateway abstraction.
-- **International shipping** — out. US addresses only; international neural-implant regulation remains, per Legal, "evolving."
-- **Deployment, Docker, PostgreSQL** — out for the life of the course.
-- **Email** (order confirmations, password reset mail) — out of the core; console backend only.
-- **Notifications, support tickets, inventory counts, uploaded product images** — out.
-- **JavaScript beyond HTMX** — out. No Alpine, no React, no build pipeline beyond Tailwind.

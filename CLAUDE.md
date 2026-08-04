@@ -1,9 +1,6 @@
 # CLAUDE.md — The ThoughtTronix Store
 
-A server-rendered Django 6 storefront and back office. The PRD
-(`prd/core-platform.md`) owns the requirements; the plan
-(`plans/core-platform.md`) owns the sequence. Where they speak, do not
-improvise alternatives.
+A server-rendered Django 6 storefront and back office. The PRD (`prd/core-platform.md`) and the plan (`plans/core-platform.md`) record how the core platform was designed and built.
 
 ## Commands
 
@@ -73,12 +70,3 @@ via environs with working defaults — the app must run with no `.env` present.
 pytest + pytest-django. Shared fixtures live in the project-level
 `conftest.py` — plain fixtures, no factory-boy. Tests never invoke the seed
 command. The suite must be green at every phase boundary.
-
-## Phase discipline
-
-- One phase per session; execute the phase asked for and do not run ahead.
-- Every phase ends green and demoable: tests pass, Ruff clean, manual QA by
-  a human before committing.
-- One commit range per phase, messages prefixed `phase-N:`. The git history
-  is a teaching artifact; keep it clean.
-- Clear context between phases.

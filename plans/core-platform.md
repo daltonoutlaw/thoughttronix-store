@@ -2,14 +2,6 @@
 
 *Companion to `prd/core-platform.md`. The PRD owns the requirements; this plan owns the sequence. Where a task says "per the PRD," the PRD's wording is authoritative — do not improvise alternatives.*
 
-## How to Use This Plan
-
-- **One phase per Claude Code session.** Provide the PRD and this plan, instruct: *execute Phase N*. Do not let a session run ahead into the next phase.
-- **Every phase ends green and demoable.** All tests pass, Ruff is clean, and the manual QA checklist has been performed by a human before committing.
-- **One commit range per phase**, messages prefixed `phase-N:`. The git history is a teaching artifact; keep it clean.
-- **Clear context between phases.**
-- **Commit zero, before Phase 1:** this plan and the PRD, committed together as `docs: PRD and implementation plan`. The documents precede the code — that is the point.
-
 ---
 
 ## Phase 1 — Tracer Bullet: One Product, Every Layer
@@ -57,7 +49,7 @@
 **Goal:** Visitors become customers: signup, login, logout, and an auth-aware layout.
 
 **Tasks:**
-1. Signup (username and password with confirmation — Django's stock `UserCreationForm` fields, no email), login, logout — Django auth views plus a signup view in `accounts`, templates styled to match. Signup redirects to the login page (auto-login after signup is deliberately left as a student exercise).
+1. Signup (username and password with confirmation — Django's stock `UserCreationForm` fields, no email), login, logout — Django auth views plus a signup view in `accounts`, templates styled to match. Signup redirects to the login page.
 2. Navbar reflects auth state (greeting + logout vs. login/signup links).
 3. Messages framework wired into `base.html`; "You have signed out" as the first message per the PRD's messages convention.
 4. `conftest.py` grows: a customer fixture and a staff fixture.
@@ -106,7 +98,7 @@
 
 ## Phase 6 — The Back Office
 
-**Goal:** Employees run the store from dedicated staff screens — the CRUD reference pattern students will imitate all semester.
+**Goal:** Employees run the store from dedicated staff screens.
 
 **Tasks:**
 1. Staff-only area with its own layout region; every view gated by an `is_staff` mixin.
@@ -123,7 +115,7 @@
 
 ## Phase 7 — Dashboard and Final Polish
 
-**Goal:** The analytics dashboard, and the finishing pass that makes the repo the artifact students receive.
+**Goal:** The analytics dashboard, and the finishing pass for the core platform.
 
 **Tasks:**
 1. `dashboard/queries.py`: the aggregation functions (revenue, order count, average order value, revenue over time, top products by revenue), docstrings and type hints, tested against small hand-computed datasets including the empty case — queries and tests before the view.
@@ -139,5 +131,3 @@
 **Out of bounds:** nothing new. This phase adds no features — it finishes the ones that exist.
 
 ---
-
-*After Phase 7: human operations, not agent instructions — tag `student-baseline`, cut the `student` branch, then begin the pulled-feature builds (`prd/address-book.md` first) on `main`.*

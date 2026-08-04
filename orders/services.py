@@ -52,10 +52,6 @@ def place_order(
     Raises ``ValueError`` if the cart is empty or holds a product that is
     no longer available.
     """
-    # Extension seam: coupon_code is accepted and ignored. Coupons are
-    # Week 5 homework; the core's contract is that passing one is safe.
-    del coupon_code
-
     lines = list(cart.lines())
     if not lines:
         raise ValueError("Cannot place an order from an empty cart.")
