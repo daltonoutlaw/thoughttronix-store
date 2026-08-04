@@ -1,27 +1,29 @@
 # PROMPTS.md — AI Usage Log
 
-Every time you use an AI tool on this codebase, log it here. Append a new
-entry at the top; never rewrite or delete old ones — the log is part of
-your work, and an honest log of a prompt that went sideways is worth more
-than a tidy one.
+This file is the record of AI use on this codebase. At the end of every
+agent session, direct the agent to write the session log with this prompt:
 
-Each entry records:
+> Append a session log to PROMPTS.md at the repo root, under today's date,
+> newest entry at the top. Record every prompt I gave you this session, in
+> order, including any corrections. End the entry with a short summary:
+> the outcome, any places where I deviated from a recommended answer or
+> asked follow-up questions, and anything that went sideways.
 
-- **Date** — when you did it
-- **Tool** — what you used (Claude Code, ChatGPT, Copilot, …)
-- **Prompt** — what you asked, verbatim or close to it
-- **Outcome** — what you kept, what you changed, what you threw away and why
+Two rules:
 
-Entry template:
+- Entries are added only by that prompt, never unprompted.
+- New entries go at the top. Never rewrite or delete an old entry — the
+  log is part of your work, and an honest log of a session that went
+  sideways is worth more than a tidy one.
 
-```markdown
-## YYYY-MM-DD — <one-line summary>
+Each entry has this shape:
 
-- **Tool:**
-- **Prompt:**
-- **Outcome:**
-```
+    ## YYYY-MM-DD — <one-line summary>
 
----
+    ### Prompts
+    1. ...
 
-*No entries yet.*
+    ### Summary
+    - **Outcome:** what was built and what was kept
+    - **Deviations:** recommendations overridden, follow-up questions asked
+    - **Sideways:** failures, wrong turns, and how they were caught
