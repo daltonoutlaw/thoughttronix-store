@@ -44,7 +44,7 @@ TAGS = [
 CATALOG = {
     "Home Assistants": [
         (
-            "Seraphine Home Hub",
+            "Seraphine",
             Decimal("249.00"),
             "She's always listening. In a good way.",
             "The flagship Seraphine, with a warm voice, a seven-microphone "
@@ -87,7 +87,7 @@ CATALOG = {
             True,
         ),
         (
-            "Hush Baby Monitor",
+            "Hush",
             Decimal("149.00"),
             "Soothes your baby in your voice. Even when it isn't you.",
             "Hush learns your lullabies, your shushing, the particular way "
@@ -111,7 +111,7 @@ CATALOG = {
     ],
     "Neural Implants": [
         (
-            "MindSync Solo",
+            "MindSync",
             Decimal("899.00"),
             "One mind, fully synchronized.",
             "The bestselling implant in ThoughtTronix history. "
@@ -165,26 +165,27 @@ CATALOG = {
             ["implant", "workplace"],
             True,
         ),
+    ],
+    "Neural Wearables": [
         (
             "MoodSet",
             Decimal("1099.00"),
             "Choose how you feel by 8 a.m.",
-            "Schedule contentment for Monday, focus for Tuesday, grief for "
-            "never. MoodSet regulates your baseline with clinical precision. "
+            "Wear MoodSet before the first meeting and schedule contentment "
+            "for Monday, focus for Tuesday, grief for never. The neural band "
+            "regulates your baseline throughout the day with clinical precision. "
             "Feelings outside the schedule are gently declined.",
-            ["implant", "new"],
+            ["workplace", "new"],
             True,
         ),
-    ],
-    "Neural Wearables": [
         (
-            "DreamCatch Sleep Recorder",
+            "DreamWeaver",
             Decimal("179.00"),
-            "Wake up to a full playback of last night.",
-            "A soft headband that records your dreams in full sensory detail "
-            "for morning playback. Share highlights with friends, or don't — "
-            "DreamCatch backs everything up either way. Nightmares are "
-            "stored under a separate tab.",
+            "Your dreams have been idle long enough.",
+            "DreamWeaver records, analyzes, and edits your dreams while you "
+            "sleep, turning unused hours into rehearsal, insight, and influence. "
+            "Wake with every result indexed and ready to review. Unrequested "
+            "material is retained in case it becomes useful later.",
             ["sleep", "bestseller"],
             True,
         ),
@@ -200,10 +201,10 @@ CATALOG = {
             True,
         ),
         (
-            "NapCap",
+            "Veil",
             Decimal("89.00"),
             "Guaranteed sleep in ninety seconds.",
-            "Pull the cap down and NapCap does the rest. Ninety seconds to "
+            "Pull the cap down and Veil does the rest. Ninety seconds to "
             "unconsciousness, twenty minutes to a complete sleep cycle — no "
             "exceptions, no interruptions. Do not wear while standing.",
             ["sleep", "workplace"],
@@ -266,7 +267,7 @@ CATALOG = {
             True,
         ),
         (
-            "Charging Pillow",
+            "SyncRest",
             Decimal("69.00"),
             "Charges your implant while you sleep. Uploads too.",
             "Memory foam with an inductive coil at its center. Your MindSync "
@@ -342,13 +343,14 @@ CATALOG = {
             True,
         ),
         (
-            "SoulSear Compact",
+            "SoulSear Tactical Core",
             Decimal("890000.00"),
-            "Battlefield clarity, carry-on sized.",
-            "Every capability of the Mark II at 40% of the mass, engineered "
-            "to fit standard overhead bins. Popular with private contractors "
-            "and, increasingly, ambitious homeowners' associations. Battery "
-            "sold separately.",
+            "Battlefield clarity, without the skyline.",
+            "The targeting and energy-control architecture of the SoulSear "
+            "Mark II, packaged for integration with existing armored platforms. "
+            "Tactical Core supplies the judgment; your equipment supplies the "
+            "chassis. Installation voids most warranties and several longstanding "
+            "assumptions about proportional response.",
             ["military", "export restricted", "new"],
             True,
         ),
@@ -367,10 +369,11 @@ CATALOG = {
             "CrowdCalm Array",
             Decimal("1750000.00"),
             "De-escalation at scale.",
-            "A vehicle-mounted wide-beam emitter that settles crowds of up "
-            "to ten thousand into a cooperative frame of mind in under a "
-            'minute. Adjustable from "compliant" to "grateful." '
-            "Municipal financing available.",
+            "A vehicle-mounted wide-beam emitter that reduces agitation across "
+            "gatherings of up to ten thousand in under a minute. Cooperation "
+            "levels are adjustable by deployment profile, and post-event "
+            "satisfaction consistently exceeds baseline. Municipal financing "
+            "available.",
             ["military", "export restricted"],
             True,
         ),
@@ -408,13 +411,13 @@ CATALOG = {
             False,
         ),
         (
-            "SoulSear Carrying Case",
+            "SoulSear Authorization Case",
             Decimal("39.00"),
             "Velvet-lined. For remembrance.",
-            "The official case of the original SoulSear Mark I, in matte "
-            "black with a crushed-velvet interior shaped to a silhouette we "
-            "no longer manufacture. Holds documents, keepsakes, or nothing "
-            "at all. Surprisingly heavy.",
+            "The official case for the original Mark I authorization key, "
+            "finished in matte black with a crushed-velvet interior molded "
+            "around hardware no current system will accept. Holds documents, "
+            "keepsakes, or nothing at all. Surprisingly heavy.",
             ["military", "gift idea"],
             True,
         ),
@@ -462,7 +465,7 @@ BACKGROUND_CUSTOMERS = [
 
 # The customer demo login's live cart: (product slug, quantity).
 CUSTOMER_CART = [
-    ("seraphine-home-hub", 2),
+    ("seraphine", 2),
     ("travel-faraday-case", 1),
     ("whisper-alarm-clock", 1),
 ]
@@ -471,10 +474,10 @@ CUSTOMER_CART = [
 # [(product slug, quantity), ...]). Statuses follow age, like the
 # background orders, plus one recent order still in flight.
 CUSTOMER_ORDERS = [
-    (124, Order.Status.DELIVERED, [("mindsync-solo", 1), ("charging-pillow", 1)]),
-    (47, Order.Status.DELIVERED, [("dreamcatch-sleep-recorder", 1)]),
+    (124, Order.Status.DELIVERED, [("mindsync", 1), ("syncrest", 1)]),
+    (47, Order.Status.DELIVERED, [("dreamweaver", 1)]),
     (9, Order.Status.SHIPPED, [("seraphine-mini", 2), ("seraphine-wall-mount", 1)]),
-    (2, Order.Status.PLACED, [("napcap", 1)]),
+    (2, Order.Status.PLACED, [("veil", 1)]),
 ]
 
 # Background orders spread across the trailing six months so the Phase 7
