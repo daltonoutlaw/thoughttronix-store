@@ -11,3 +11,6 @@
 - Every list view gets a designed empty state, not a blank page.
 - Styling is Tailwind + DaisyUI classes only; no crispy-forms, no JavaScript
   beyond HTMX.
+- Status and feedback styling uses DaisyUI semantic classes such as `alert-*`,
+  `badge-*`, and `text-error`. Do not use raw Tailwind color classes such as
+  `bg-yellow-100` or `text-red-500`.
