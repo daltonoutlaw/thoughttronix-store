@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Addresses — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold">Saved Addresses</h1>
+      <p class="mt-1 text-sm opacity-70">Manage your shipping and billing addresses for faster checkout.</p>
+    </div>
+    <a href="{% url 'accounts:address_create' %}" class="btn btn-primary btn-sm self-start sm:self-auto">
+      + Add new address
+    </a>
+  </div>
+
+  {% if addresses %}
+    <div class="mt-8 grid gap-6 md:grid-cols-2">
+      {% for address in addresses %}
+        <div class="card bg-base-100 shadow-md">
+          <div class="card-body">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                {% if address.label %}
+                  <span class="badge badge-outline font-semibold">{{ address.label }}</span>
+                {% endif %}
+                <h2 class="card-title text-lg mt-1">{{ address.name }}</h2>
+              </div>
+              <div class="flex flex-wrap gap-1 justify-end">
+                {% if address.is_default_shipping %}
+                  <span class="badge badge-primary badge-sm">Default Shipping</span>
+                {% endif %}
+                {% if address.is_default_billing %}
+                  <span class="badge badge-secondary badge-sm">Default Billing</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mt-3 text-sm opacity-80 space-y-0.5">
+              <p>{{ address.street }}</p>
+              {% if address.line2 %}<p>{{ address.line2 }}</p>{% endif %}
+              <p>{{ address.city }}, {{ address.state }} {{ address.zip }}</p>
+            </div>
+
+            <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-between items-center">
+              <div class="flex gap-2">
+                <a href="{% url 'accounts:address_update' address.pk %}" class="btn btn-ghost btn-xs">
+                  Edit
+                </a>
+                <a href="{% url 'accounts:address_delete' address.pk %}" class="btn btn-ghost btn-xs text-error">
+                  Delete
+                </a>
+              </div>
+
+              {% if not address.is_default_shipping or not address.is_default_billing %}
+                <div class="dropdown dropdown-end">
+                  <div tabindex="0" role="button" class="btn btn-ghost btn-xs">Set as default ▾</div>
+                  <ul tabindex="0" class="dropdown-content menu z-[1] p-2 shadow-lg bg-base-200 rounded-box w-48 text-xs">
+                    {% if not address.is_default_shipping %}
+                      <li>
+                        <form method="post" action="{% url 'accounts:address_set_default' address.pk %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="target" value="shipping">
+                          <button type="submit" class="w-full text-left">Default Shipping</button>
+                        </form>
+                      </li>
+                    {% endif %}
+                    {% if not address.is_default_billing %}
+                      <li>
+                        <form method="post" action="{% url 'accounts:address_set_default' address.pk %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="target" value="billing">
+                          <button type="submit" class="w-full text-left">Default Billing</button>
+                        </form>
+                      </li>
+                    {% endif %}
+                    {% if not address.is_default_shipping and not address.is_default_billing %}
+                      <li>
+                        <form method="post" action="{% url 'accounts:address_set_default' address.pk %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="target" value="both">
+                          <button type="submit" class="w-full text-left">Default for Both</button>
+                        </form>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="py-16 text-center">
+      <p class="text-5xl">📍</p>
+      <p class="mt-4 text-xl font-semibold">No saved addresses</p>
+      <p class="mt-2 opacity-70">Add an address to speed up future checkouts.</p>
+      <a href="{% url 'accounts:address_create' %}" class="btn btn-primary btn-sm mt-6">
+        Add your first address
+      </a>
+    </div>
+  {% endif %}
+{% endblock %}

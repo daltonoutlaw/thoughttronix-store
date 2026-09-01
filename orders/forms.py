@@ -78,6 +78,9 @@ class CheckoutForm(forms.Form):
 
     email = forms.EmailField(label="Email")
 
+    shipping_address_choice = forms.ChoiceField(
+        label="Saved shipping address", required=False
+    )
     shipping_name = forms.CharField(label="Full name", max_length=100)
     shipping_street = forms.CharField(label="Street address", max_length=200)
     shipping_line2 = forms.CharField(
@@ -88,7 +91,16 @@ class CheckoutForm(forms.Form):
     shipping_zip = forms.CharField(
         label="ZIP code", max_length=10, validators=[zip_validator]
     )
+    save_shipping_address = forms.BooleanField(
+        label="Save this address to my account", required=False
+    )
+    set_default_shipping = forms.BooleanField(
+        label="Set as default shipping address", required=False
+    )
 
+    billing_address_choice = forms.ChoiceField(
+        label="Saved billing address", required=False
+    )
     billing_name = forms.CharField(label="Full name", max_length=100)
     billing_street = forms.CharField(label="Street address", max_length=200)
     billing_line2 = forms.CharField(
@@ -99,6 +111,12 @@ class CheckoutForm(forms.Form):
     billing_zip = forms.CharField(
         label="ZIP code", max_length=10, validators=[zip_validator]
     )
+    save_billing_address = forms.BooleanField(
+        label="Save this address to my account", required=False
+    )
+    set_default_billing = forms.BooleanField(
+        label="Set as default billing address", required=False
+    )
 
     card_number = forms.CharField(
         label="Card number", max_length=23, validators=[validate_card_number]
@@ -108,16 +126,93 @@ class CheckoutForm(forms.Form):
     )
     card_cvv = forms.CharField(label="CVV", max_length=4, validators=[cvv_validator])
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.user = user
+
+        if user and user.is_authenticated and hasattr(user, "addresses"):
+            addresses = list(user.addresses.all())
+            if addresses:
+                choices = [(str(addr.pk), str(addr)) for addr in addresses]
+                choices.append(("new", "Enter new address"))
+                self.fields["shipping_address_choice"].choices = choices
+                self.fields["billing_address_choice"].choices = choices
+
+                if not self.is_bound:
+                    default_shipping = next(
+                        (a for a in addresses if a.is_default_shipping), addresses[0]
+                    )
+                    default_billing = next(
+                        (a for a in addresses if a.is_default_billing), addresses[0]
+                    )
+
+                    self.initial.setdefault(
+                        "shipping_address_choice", str(default_shipping.pk)
+                    )
+                    self.initial.setdefault("shipping_name", default_shipping.name)
+                    self.initial.setdefault("shipping_street", default_shipping.street)
+                    self.initial.setdefault("shipping_line2", default_shipping.line2)
+                    self.initial.setdefault("shipping_city", default_shipping.city)
+                    self.initial.setdefault("shipping_state", default_shipping.state)
+                    self.initial.setdefault("shipping_zip", default_shipping.zip)
+
+                    self.initial.setdefault(
+                        "billing_address_choice", str(default_billing.pk)
+                    )
+                    self.initial.setdefault("billing_name", default_billing.name)
+                    self.initial.setdefault("billing_street", default_billing.street)
+                    self.initial.setdefault("billing_line2", default_billing.line2)
+                    self.initial.setdefault("billing_city", default_billing.city)
+                    self.initial.setdefault("billing_state", default_billing.state)
+                    self.initial.setdefault("billing_zip", default_billing.zip)
+            else:
+                self.fields["shipping_address_choice"].choices = [
+                    ("new", "Enter new address")
+                ]
+                self.fields["billing_address_choice"].choices = [
+                    ("new", "Enter new address")
+                ]
+                if not self.is_bound:
+                    self.initial.setdefault("shipping_address_choice", "new")
+                    self.initial.setdefault("billing_address_choice", "new")
+        else:
+            self.fields["shipping_address_choice"].choices = [
+                ("new", "Enter new address")
+            ]
+            self.fields["billing_address_choice"].choices = [
+                ("new", "Enter new address")
+            ]
+
         for field in self.fields.values():
             widget = field.widget
-            if isinstance(widget, forms.Select):
+            if isinstance(widget, forms.CheckboxInput):
+                widget.attrs["class"] = "checkbox checkbox-primary"
+            elif isinstance(widget, forms.Select):
                 widget.attrs["class"] = "select w-full"
             else:
                 widget.attrs["class"] = "input w-full"
 
     # Field groups for the template — the form owns its own structure.
+
+    def shipping_address_fields(self):
+        return [
+            self["shipping_name"],
+            self["shipping_street"],
+            self["shipping_line2"],
+            self["shipping_city"],
+            self["shipping_state"],
+            self["shipping_zip"],
+        ]
+
+    def billing_address_fields(self):
+        return [
+            self["billing_name"],
+            self["billing_street"],
+            self["billing_line2"],
+            self["billing_city"],
+            self["billing_state"],
+            self["billing_zip"],
+        ]
 
     def shipping_fields(self):
         return [self[name] for name in self.fields if name.startswith("shipping_")]

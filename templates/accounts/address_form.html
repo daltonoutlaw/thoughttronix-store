@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edit Address{% else %}New Address{% endif %} — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-xl">
+    <div class="mb-4">
+      <a href="{% url 'accounts:address_list' %}" class="link link-hover text-sm opacity-70">
+        ← Back to saved addresses
+      </a>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h1 class="card-title text-2xl">
+          {% if object %}Edit Address{% else %}Add Address{% endif %}
+        </h1>
+        <p class="text-sm opacity-70">
+          {% if object %}Update your address details.{% else %}Save a new shipping or billing address.{% endif %}
+        </p>
+
+        <form method="post" class="mt-4 space-y-4">
+          {% csrf_token %}
+
+          {% for error in form.non_field_errors %}
+            <div class="alert alert-error" role="alert"><span>{{ error }}</span></div>
+          {% endfor %}
+
+          <div>
+            <label class="label mb-1" for="{{ form.label.id_for_label }}">{{ form.label.label }}</label>
+            {{ form.label }}
+            {% for error in form.label.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div>
+            <label class="label mb-1" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% for error in form.name.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div>
+            <label class="label mb-1" for="{{ form.street.id_for_label }}">{{ form.street.label }}</label>
+            {{ form.street }}
+            {% for error in form.street.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div>
+            <label class="label mb-1" for="{{ form.line2.id_for_label }}">{{ form.line2.label }}</label>
+            {{ form.line2 }}
+            {% for error in form.line2.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="sm:col-span-1">
+              <label class="label mb-1" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+              {{ form.city }}
+              {% for error in form.city.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+            </div>
+            <div>
+              <label class="label mb-1" for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
+              {{ form.state }}
+              {% for error in form.state.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+            </div>
+            <div>
+              <label class="label mb-1" for="{{ form.zip.id_for_label }}">{{ form.zip.label }}</label>
+              {{ form.zip }}
+              {% for error in form.zip.errors %}<p class="mt-1 text-sm text-error">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="space-y-3">
+            <label class="label cursor-pointer justify-start gap-3">
+              {{ form.is_default_shipping }}
+              <span class="label-text">{{ form.is_default_shipping.label }}</span>
+            </label>
+            <label class="label cursor-pointer justify-start gap-3">
+              {{ form.is_default_billing }}
+              <span class="label-text">{{ form.is_default_billing.label }}</span>
+            </label>
+          </div>
+
+          <div class="flex gap-4 pt-4">
+            <button type="submit" class="btn btn-primary flex-1">
+              {% if object %}Save changes{% else %}Save address{% endif %}
+            </button>
+            <a href="{% url 'accounts:address_list' %}" class="btn btn-ghost">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

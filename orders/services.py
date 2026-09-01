@@ -78,4 +78,32 @@ def place_order(
             quantity=line.quantity,
         )
     cart.items.all().delete()
+
+    if user.is_authenticated:
+        from accounts.models import Address
+
+        if checkout_data.get("save_shipping_address"):
+            Address.objects.create(
+                user=user,
+                name=checkout_data["shipping_name"],
+                street=checkout_data["shipping_street"],
+                line2=checkout_data.get("shipping_line2", ""),
+                city=checkout_data["shipping_city"],
+                state=checkout_data["shipping_state"],
+                zip=checkout_data["shipping_zip"],
+                is_default_shipping=bool(checkout_data.get("set_default_shipping")),
+            )
+
+        if checkout_data.get("save_billing_address"):
+            Address.objects.create(
+                user=user,
+                name=checkout_data["billing_name"],
+                street=checkout_data["billing_street"],
+                line2=checkout_data.get("billing_line2", ""),
+                city=checkout_data["billing_city"],
+                state=checkout_data["billing_state"],
+                zip=checkout_data["billing_zip"],
+                is_default_billing=bool(checkout_data.get("set_default_billing")),
+            )
+
     return order

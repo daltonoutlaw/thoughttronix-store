@@ -85,6 +85,47 @@ class RemoveCartItemView(CartItemActionView):
         item.delete()
 
 
+class CheckoutAddressFieldsView(LoginRequiredMixin, View):
+    """HTMX: re-render shipping or billing form fields when address choice changes."""
+
+    def get(self, request):
+        address_type = request.GET.get("type", "shipping")
+        address_id = request.GET.get(
+            f"{address_type}_address_choice"
+        ) or request.GET.get("address_id")
+
+        initial = {}
+        is_new = True
+
+        if address_id and address_id != "new":
+            from accounts.models import Address
+
+            address = Address.objects.filter(pk=address_id, user=request.user).first()
+            if address:
+                is_new = False
+                prefix = f"{address_type}_"
+                initial = {
+                    f"{prefix}address_choice": str(address.pk),
+                    f"{prefix}name": address.name,
+                    f"{prefix}street": address.street,
+                    f"{prefix}line2": address.line2,
+                    f"{prefix}city": address.city,
+                    f"{prefix}state": address.state,
+                    f"{prefix}zip": address.zip,
+                }
+
+        form = CheckoutForm(user=request.user, initial=initial)
+        return render(
+            request,
+            "orders/partials/_address_fields.html",
+            {
+                "form": form,
+                "address_type": address_type,
+                "is_new": is_new,
+            },
+        )
+
+
 class CheckoutView(LoginRequiredMixin, FormView):
     """The single checkout page: validate the form, hand off to the service.
 
@@ -96,6 +137,11 @@ class CheckoutView(LoginRequiredMixin, FormView):
 
     template_name = "orders/checkout.html"
     form_class = CheckoutForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:

@@ -23,25 +23,60 @@
 
       <section class="card bg-base-100 shadow-md">
         <div class="card-body">
-          <h2 class="card-title">Shipping address</h2>
-          <div class="grid gap-4 sm:grid-cols-2">
-            {% for field in form.shipping_fields %}
-              {% include "orders/partials/_field.html" %}
-            {% endfor %}
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h2 class="card-title">Shipping address</h2>
+            {% if user.addresses.exists %}
+              <div class="w-full sm:w-64">
+                <select name="shipping_address_choice"
+                        id="id_shipping_address_choice"
+                        class="select select-bordered select-sm w-full"
+                        hx-get="{% url 'orders:checkout_address_fields' %}?type=shipping"
+                        hx-target="#shipping-fields-container"
+                        hx-swap="innerHTML">
+                  {% for val, label in form.fields.shipping_address_choice.choices %}
+                    <option value="{{ val }}" {% if form.shipping_address_choice.value == val %}selected{% endif %}>
+                      {{ label }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+          </div>
+
+          <div id="shipping-fields-container" class="mt-4">
+            {% include "orders/partials/_address_fields.html" with address_type="shipping" is_new=form.shipping_address_choice.value|default:"new" %}
           </div>
         </div>
       </section>
 
       <section class="card bg-base-100 shadow-md">
         <div class="card-body">
-          <h2 class="card-title">Billing address</h2>
-          <div class="grid gap-4 sm:grid-cols-2">
-            {% for field in form.billing_fields %}
-              {% include "orders/partials/_field.html" %}
-            {% endfor %}
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h2 class="card-title">Billing address</h2>
+            {% if user.addresses.exists %}
+              <div class="w-full sm:w-64">
+                <select name="billing_address_choice"
+                        id="id_billing_address_choice"
+                        class="select select-bordered select-sm w-full"
+                        hx-get="{% url 'orders:checkout_address_fields' %}?type=billing"
+                        hx-target="#billing-fields-container"
+                        hx-swap="innerHTML">
+                  {% for val, label in form.fields.billing_address_choice.choices %}
+                    <option value="{{ val }}" {% if form.billing_address_choice.value == val %}selected{% endif %}>
+                      {{ label }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+          </div>
+
+          <div id="billing-fields-container" class="mt-4">
+            {% include "orders/partials/_address_fields.html" with address_type="billing" is_new=form.billing_address_choice.value|default:"new" %}
           </div>
         </div>
       </section>
+
 
       <section class="card bg-base-100 shadow-md">
         <div class="card-body">

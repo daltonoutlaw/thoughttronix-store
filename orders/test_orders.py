@@ -138,6 +138,70 @@ def test_confirmation_shows_the_order_number(client, customer, order):
     assert order.number in response.content.decode()
 
 
+def test_checkout_shows_saved_address_selector_when_user_has_addresses(
+    client, customer, cart_item
+):
+    from accounts.models import Address
+
+    Address.objects.create(
+        user=customer,
+        label="Home Base",
+        name="Casey Monroe",
+        street="12 Cortex Lane",
+        city="Canyon",
+        state="TX",
+        zip="79015",
+    )
+    client.force_login(customer)
+
+    response = client.get(reverse("orders:checkout"))
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+    assert "Home Base" in page
+    assert "id_shipping_address_choice" in page
+
+
+def test_checkout_address_fields_htmx_returns_saved_address_partial(
+    client, customer, db
+):
+    from accounts.models import Address
+
+    addr = Address.objects.create(
+        user=customer,
+        name="Casey Monroe",
+        street="99 Neuro Way",
+        city="Canyon",
+        state="TX",
+        zip="79015",
+    )
+    client.force_login(customer)
+
+    response = client.get(
+        reverse("orders:checkout_address_fields"),
+        {"type": "shipping", "shipping_address_choice": str(addr.pk)},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+    assert "99 Neuro Way" in page
+
+
+def test_checkout_address_fields_htmx_returns_blank_fields_for_new(
+    client, customer, db
+):
+    client.force_login(customer)
+
+    response = client.get(
+        reverse("orders:checkout_address_fields"),
+        {"type": "shipping", "shipping_address_choice": "new"},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+    assert "Save this address to my account" in page
+
+
 # --- Order history and detail ------------------------------------------------
 
 

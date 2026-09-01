@@ -1,0 +1,73 @@
+{% if address_type == "shipping" %}
+  <div id="shipping-address-fields" class="space-y-4">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.shipping_name %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.shipping_street %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.shipping_line2 %}
+      </div>
+      <div>
+        {% include "orders/partials/_field.html" with field=form.shipping_city %}
+      </div>
+      <div>
+        {% include "orders/partials/_field.html" with field=form.shipping_state %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.shipping_zip %}
+      </div>
+    </div>
+
+    {% if is_new == True or is_new == "new" %}
+      <div class="pt-2 space-y-2 border-t border-base-200">
+        <label class="label cursor-pointer justify-start gap-3">
+          {{ form.save_shipping_address }}
+          <span class="label-text text-sm">{{ form.save_shipping_address.label }}</span>
+        </label>
+        <label class="label cursor-pointer justify-start gap-3">
+          {{ form.set_default_shipping }}
+          <span class="label-text text-sm">{{ form.set_default_shipping.label }}</span>
+        </label>
+      </div>
+    {% endif %}
+  </div>
+{% else %}
+  <div id="billing-address-fields" class="space-y-4">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.billing_name %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.billing_street %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.billing_line2 %}
+      </div>
+      <div>
+        {% include "orders/partials/_field.html" with field=form.billing_city %}
+      </div>
+      <div>
+        {% include "orders/partials/_field.html" with field=form.billing_state %}
+      </div>
+      <div class="sm:col-span-2">
+        {% include "orders/partials/_field.html" with field=form.billing_zip %}
+      </div>
+    </div>
+
+    {% if is_new == True or is_new == "new" %}
+      <div class="pt-2 space-y-2 border-t border-base-200">
+        <label class="label cursor-pointer justify-start gap-3">
+          {{ form.save_billing_address }}
+          <span class="label-text text-sm">{{ form.save_billing_address.label }}</span>
+        </label>
+        <label class="label cursor-pointer justify-start gap-3">
+          {{ form.set_default_billing }}
+          <span class="label-text text-sm">{{ form.set_default_billing.label }}</span>
+        </label>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

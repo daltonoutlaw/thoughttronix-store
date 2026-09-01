@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Delete address — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="card mx-auto max-w-lg bg-base-100 shadow-md">
+    <div class="card-body">
+      <h2 class="card-title text-error">Delete address?</h2>
+      <p class="opacity-80">
+        Are you sure you want to delete <strong>{{ address.label|default:address.name }}</strong> ({{ address.street }}, {{ address.city }}, {{ address.state }})?
+      </p>
+      <p class="text-sm opacity-60">
+        Past orders will not be affected.
+      </p>
+      <form method="post" class="mt-4 flex justify-end gap-2">
+        {% csrf_token %}
+        <a href="{% url 'accounts:address_list' %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-error">Delete address</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

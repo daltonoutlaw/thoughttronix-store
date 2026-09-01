@@ -71,3 +71,23 @@ def test_the_form_declares_no_imperative_validation():
     """The showcase contract: declarative rules only, per the PRD."""
     assert "clean" not in CheckoutForm.__dict__
     assert not any(name.startswith("clean_") for name in CheckoutForm.__dict__)
+
+
+def test_form_with_user_prepopulates_default_addresses(customer):
+    from accounts.models import Address
+
+    addr = Address.objects.create(
+        user=customer,
+        name="Casey Default",
+        street="100 Prime Way",
+        city="Austin",
+        state="TX",
+        zip="78701",
+    )
+    form = CheckoutForm(user=customer)
+
+    assert form.initial["shipping_address_choice"] == str(addr.pk)
+    assert form.initial["shipping_name"] == "Casey Default"
+    assert form.initial["shipping_street"] == "100 Prime Way"
+    assert form.initial["billing_name"] == "Casey Default"
+    assert len(form.fields["shipping_address_choice"].choices) == 2  # addr + new

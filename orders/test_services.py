@@ -128,3 +128,24 @@ def test_the_coupon_seam_is_accepted_and_ignored(cart, cart_item, checkout_data)
     order = place_order(cart, cart.user, checkout_data, coupon_code="THOUGHTS10")
 
     assert order.total == Decimal("699.98")
+
+
+def test_place_order_saves_shipping_and_billing_addresses(
+    cart, cart_item, checkout_data
+):
+    from accounts.models import Address
+
+    data = {
+        **checkout_data,
+        "save_shipping_address": True,
+        "set_default_shipping": True,
+        "save_billing_address": True,
+        "set_default_billing": True,
+    }
+    place_order(cart, cart.user, data)
+
+    assert Address.objects.filter(user=cart.user).count() == 2
+    shipping = Address.objects.get(user=cart.user, is_default_shipping=True)
+    billing = Address.objects.get(user=cart.user, is_default_billing=True)
+    assert shipping.street == "12 Cortex Lane"
+    assert billing.street == "12 Cortex Lane"
