@@ -254,3 +254,14 @@ def test_seed_is_idempotent(db):
     )
 
     assert first == second
+
+
+def test_recall_notices_page(client):
+    response = client.get(reverse("recall_notices"))
+
+    assert response.status_code == HTTPStatus.OK
+    content = response.content.decode()
+    assert "Safety and Recall Notices" in content
+    assert "SoulSear Mark I" in content
+    assert "badge-error" in content
+    assert "alert-warning" in content
