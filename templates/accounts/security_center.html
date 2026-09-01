@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Security Center — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="space-y-8">
+    <div>
+      <h1 class="text-3xl font-bold">Account Security Center</h1>
+      <p class="mt-1 text-sm opacity-70">
+        Monitor your account security posture, manage authentication credentials, and protect your neural data.
+      </p>
+    </div>
+
+    <!-- Security Posture Overview Cards -->
+    <div class="grid gap-6 md:grid-cols-3">
+      <!-- Password Health Card -->
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body">
+          <div class="flex items-start justify-between">
+            <div class="text-2xl">🔑</div>
+            {% if password_set %}
+              <span class="badge badge-success badge-sm font-semibold">Active</span>
+            {% else %}
+              <span class="badge badge-warning badge-sm font-semibold">Not Set</span>
+            {% endif %}
+          </div>
+          <h2 class="card-title text-lg mt-2">Password Protection</h2>
+          <p class="text-sm opacity-80">
+            Secures your account during sign-in. Regular credential rotation helps protect your order history and neural implants.
+          </p>
+          <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-end">
+            <a href="{% url 'accounts:password_change' %}" class="btn btn-primary btn-sm w-full">
+              Change Password
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Factor Authentication Card -->
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body">
+          <div class="flex items-start justify-between">
+            <div class="text-2xl">🛡️</div>
+            {% if two_factor_enabled %}
+              <span class="badge badge-success badge-sm font-semibold">Enabled</span>
+            {% else %}
+              <span class="badge badge-ghost badge-sm font-semibold opacity-75">Disabled</span>
+            {% endif %}
+          </div>
+          <h2 class="card-title text-lg mt-2">Two-Factor Auth (2FA)</h2>
+          <p class="text-sm opacity-80">
+            {% if two_factor_enabled %}
+              Two-factor authentication is active on your account with TOTP protection.
+            {% else %}
+              Protect your account from credential theft by requiring a time-based verification code on login.
+            {% endif %}
+          </p>
+          <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-end">
+            {% if two_factor_enabled %}
+              <span class="text-xs opacity-70 py-1">Protected via TOTP</span>
+            {% else %}
+              <span class="text-xs opacity-70 py-1">2FA setup available soon</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Sessions Card -->
+      <div class="card bg-base-100 shadow-md">
+        <div class="card-body">
+          <div class="flex items-start justify-between">
+            <div class="text-2xl">💻</div>
+            <span class="badge badge-info badge-sm font-semibold">{{ active_session_count }} Active</span>
+          </div>
+          <h2 class="card-title text-lg mt-2">Active Sessions</h2>
+          <p class="text-sm opacity-80">
+            Devices and browser sessions currently authenticated with access to your account.
+          </p>
+          <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-end">
+            <span class="text-xs opacity-70 py-1">Current device active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Recommendations & Details -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h2 class="card-title text-xl">Security Best Practices</h2>
+        <div class="mt-2 grid gap-4 md:grid-cols-2 text-sm opacity-85">
+          <div class="space-y-1">
+            <p class="font-semibold text-base-content">Unique Passwords</p>
+            <p class="opacity-70">
+              Never reuse passwords across services. Use a strong, generated password with at least 8 characters.
+            </p>
+          </div>
+          <div class="space-y-1">
+            <p class="font-semibold text-base-content">Instant Alerts</p>
+            <p class="opacity-70">
+              We send email notifications whenever critical security actions, such as password changes, occur on your account.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,5 +1,11 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    UserCreationForm,
+)
+from django.contrib.auth.forms import (
+    PasswordChangeForm as DjangoPasswordChangeForm,
+)
 
 from orders.forms import US_STATES, zip_validator
 
@@ -70,3 +76,12 @@ class AddressForm(forms.ModelForm):
                 widget.attrs["class"] = "select w-full"
             else:
                 widget.attrs["class"] = "input w-full"
+
+
+class PasswordChangeForm(DjangoPasswordChangeForm):
+    """Step-up password change form dressed in DaisyUI."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "input w-full"

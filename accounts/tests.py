@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.urls import reverse
 
 from .models import Address
@@ -110,6 +111,8 @@ def test_navbar_greets_signed_in_customer(client, customer):
     assert "Hi, customer" in page
     assert "Sign out" in page
     assert reverse("accounts:address_list") in page
+    assert reverse("accounts:security_center") in page
+    assert "Security Center" in page
     assert reverse("accounts:signup") not in page
 
 
@@ -345,3 +348,134 @@ def test_set_default_address_view(client, customer):
     addr2.refresh_from_db()
     assert not addr1.is_default_shipping
     assert addr2.is_default_shipping
+
+
+# --- Security Center & Password Rotation (Phase 1) --------------------------
+
+
+def test_security_center_requires_login(client, db):
+    response = client.get(reverse("accounts:security_center"))
+    assert response.status_code == HTTPStatus.FOUND
+    assert reverse("accounts:login") in response.url
+
+
+def test_security_center_renders_posture_cards_for_authenticated_customer(
+    client, customer
+):
+    client.force_login(customer)
+    response = client.get(reverse("accounts:security_center"))
+
+    assert response.status_code == HTTPStatus.OK
+    content = response.content.decode()
+    assert "Account Security Center" in content
+    assert "Password Protection" in content
+    assert "Two-Factor Auth" in content
+    assert "Active Sessions" in content
+    assert reverse("accounts:password_change") in content
+
+
+def test_password_change_requires_login(client, db):
+    response = client.get(reverse("accounts:password_change"))
+    assert response.status_code == HTTPStatus.FOUND
+    assert reverse("accounts:login") in response.url
+
+
+def test_password_change_page_returns_200(client, customer):
+    client.force_login(customer)
+    response = client.get(reverse("accounts:password_change"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert "Change Password" in response.content.decode()
+    assert "form" in response.context
+
+
+def test_password_change_invalid_current_password(client, customer):
+    client.force_login(customer)
+    response = client.post(
+        reverse("accounts:password_change"),
+        {
+            "old_password": "wrongpassword",
+            "new_password1": "SecureNewPass999!",
+            "new_password2": "SecureNewPass999!",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.context["form"].errors["old_password"]
+
+    # Verify password was not altered
+    customer.refresh_from_db()
+    assert customer.check_password("customer123")
+    assert not customer.check_password("SecureNewPass999!")
+
+
+def test_password_change_mismatched_new_passwords(client, customer):
+    client.force_login(customer)
+    response = client.post(
+        reverse("accounts:password_change"),
+        {
+            "old_password": "customer123",
+            "new_password1": "SecureNewPass999!",
+            "new_password2": "DifferentPass888!",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.context["form"].errors["new_password2"]
+
+    customer.refresh_from_db()
+    assert customer.check_password("customer123")
+
+
+def test_password_change_too_weak(client, customer):
+    client.force_login(customer)
+    response = client.post(
+        reverse("accounts:password_change"),
+        {
+            "old_password": "customer123",
+            "new_password1": "123",
+            "new_password2": "123",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.context["form"].errors["new_password2"]
+
+    customer.refresh_from_db()
+    assert customer.check_password("customer123")
+
+
+def test_password_change_successful_rotation_and_email(client, customer):
+    customer.email = "casey@thoughttronix.com"
+    customer.save()
+
+    client.force_login(customer)
+    response = client.post(
+        reverse("accounts:password_change"),
+        {
+            "old_password": "customer123",
+            "new_password1": "SecureNewPass999!",
+            "new_password2": "SecureNewPass999!",
+        },
+        follow=True,
+    )
+
+    # Verifies redirect to Security Center and success notification
+    assert response.redirect_chain[-1][0] == reverse("accounts:security_center")
+    assert "Your password has been changed successfully." in response.content.decode()
+
+    # Verifies session is kept active without unexpected sign-out
+    assert response.context["user"].is_authenticated
+    assert response.context["user"] == customer
+
+    # Verifies database password hash was updated
+    customer.refresh_from_db()
+    assert customer.check_password("SecureNewPass999!")
+    assert not customer.check_password("customer123")
+
+    # Verifies transactional alert email was dispatched
+    assert len(mail.outbox) == 1
+    email = mail.outbox[0]
+    assert email.to == ["casey@thoughttronix.com"]
+    assert "Security Alert: Password Changed" in email.subject
+    assert "changed successfully" in email.body

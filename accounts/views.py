@@ -1,13 +1,26 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+)
+from django.contrib.auth.views import (
+    PasswordChangeView as AuthPasswordChangeView,
+)
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
-from .forms import AddressForm, SignInForm, SignupForm
+from .forms import AddressForm, PasswordChangeForm, SignInForm, SignupForm
 from .models import Address
 
 
@@ -35,6 +48,51 @@ class SignOutView(LogoutView):
         # would be wiped along with it.
         response = super().post(request, *args, **kwargs)
         messages.info(request, "You have signed out.")
+        return response
+
+
+class SecurityCenterView(LoginRequiredMixin, TemplateView):
+    """Account Security Center dashboard."""
+
+    template_name = "accounts/security_center.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["two_factor_enabled"] = getattr(
+            user, "totp_device", None
+        ) is not None and getattr(user.totp_device, "is_confirmed", False)
+        context["password_set"] = user.has_usable_password()
+        context["active_session_count"] = 1
+        return context
+
+
+class PasswordChangeView(
+    LoginRequiredMixin, SuccessMessageMixin, AuthPasswordChangeView
+):
+    """Step-up password rotation requiring current password verification."""
+
+    form_class = PasswordChangeForm
+    template_name = "accounts/password_change.html"
+    success_url = reverse_lazy("accounts:security_center")
+    success_message = "Your password has been changed successfully."
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = self.request.user
+        if user.email:
+            send_mail(
+                subject="Security Alert: Password Changed",
+                message=(
+                    f"Hello {user.username},\n\n"
+                    "Your ThoughtTronix account password was changed successfully.\n\n"
+                    "If you did not perform this change, please contact our security team immediately.\n\n"
+                    "— The ThoughtTronix Security Team"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
         return response
 
 
