@@ -74,9 +74,10 @@ Enhance the `/wishlist/` page by adding interactive item actions: an "Add to Car
 
 ### Acceptance criteria
 
-- [ ] Each item on `/wishlist/` has a "Remove" button that removes the item immediately via HTMX.
-- [ ] Removing the final item dynamically transitions the page or container to the designed empty state.
-- [ ] In-stock wishlisted items include an "Add to Cart" button that adds the item to the user's active cart.
-- [ ] Unavailable wishlisted items have their "Add to Cart" button disabled with an "Unavailable" badge.
-- [ ] Removing an item only affects the authenticated customer's own wishlist.
-- [ ] Automated tests verify HTMX removal endpoint, cart addition integration, unavailable product behavior, and customer isolation.
+- [x] Each item on `/wishlist/` has a "Remove" button that removes the item immediately via HTMX.
+- [x] Removing the final item dynamically transitions the page or container to the designed empty state.
+- [x] In-stock wishlisted items include an "Add to Cart" button that adds the item to the user's active cart.
+- [x] Unavailable wishlisted items have their "Add to Cart" button disabled with an "Unavailable" badge.
+- [x] Removing an item only affects the authenticated customer's own wishlist.
+- [x] Automated tests verify HTMX removal endpoint, cart addition integration, unavailable product behavior, and customer isolation.
+

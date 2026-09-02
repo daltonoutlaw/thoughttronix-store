@@ -30,6 +30,24 @@ Each entry has this shape:
 
 ---
 
+## 2026-09-02 — Customer Wishlist Phase 3: Wishlist Page Actions (Cart Integration & Inline Removal)
+
+### Prompts
+1. `/implement @prd/wishlist.md @plans/wishlist.md implement phase 3`
+2. `i approve`
+   - *TDD Candidates Approved:* (1) Removal endpoint & isolation, (2) Empty state transition on final item removal, (3) Cart action states for in-stock vs unavailable products
+3. `i approve`
+   - *Cycle 1 Approved:* Wishlist removal endpoint and partial rendering
+4. `approved`
+   - *Manual Verification:* Confirmed manual verification passed
+
+### Summary
+- **Outcome:** Completed Phase 3 of the Customer Wishlist feature. Added `wishlists:remove` (`/wishlist/remove/<int:pk>/`) endpoint allowing authenticated customers to remove items directly from the wishlist page with HTMX without full page reload. Extracted `templates/wishlists/partials/_wishlist_contents.html` to dynamically update wishlist contents, item count header, and seamlessly transition to the empty state when the final item is removed. Integrated cart actions on each item card using `orders/partials/_add_button.html` so in-stock items can be added to the active cart with out-of-band navbar badge updates, while unavailable items display a disabled button. Added comprehensive automated tests for removal, customer isolation, empty state transition, and cart addition integration. All 259 tests passed, and linter/formatter checks passed cleanly.
+- **Deviations:** None. Followed TDD and implement skill guidelines.
+- **Sideways:** Encountered an `AttributeError` in the cart integration test when calling `cart.lines.filter` (`lines` is a method on Cart); resolved by querying `cart.items.filter`.
+
+---
+
 ## 2026-09-02 — Customer Wishlist Phase 2: Dedicated Wishlist Page & Storefront Navigation
 
 ### Prompts

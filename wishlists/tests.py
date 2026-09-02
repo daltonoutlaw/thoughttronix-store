@@ -276,3 +276,103 @@ def test_wishlist_detail_renders_empty_state_when_no_items(client, customer):
     assert "Browse the catalog" in page
     assert "0 items saved" in page
     assert response.context["items"].count() == 0
+
+
+def test_remove_endpoint_removes_product_and_isolates_customers(
+    client, customer, wishlist_item, unavailable_product
+):
+    # Customer has two items
+    customer.wishlist.add(unavailable_product)
+
+    # Another customer has their own item
+    other_customer = get_user_model().objects.create_user(
+        username="other_customer",
+        password="password123",
+        email="other@thoughttronix.example",
+    )
+    Wishlist.for_user(other_customer).add(wishlist_item.product)
+
+    client.force_login(customer)
+    response = client.post(
+        reverse("wishlists:remove", kwargs={"pk": wishlist_item.product.pk})
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+    # Customer no longer has the removed item
+    assert not customer.wishlist.contains(wishlist_item.product)
+    # Customer still has the remaining item
+    assert customer.wishlist.contains(unavailable_product)
+    # Other customer's item is NOT removed
+    assert other_customer.wishlist.contains(wishlist_item.product)
+    # The returned partial shows the remaining item and not the removed item
+    assert unavailable_product.name in page
+    assert wishlist_item.product.name not in page
+    # Not a full page reload
+    assert "<html" not in page
+
+
+def test_removing_final_item_renders_empty_state_partial(
+    client, customer, wishlist_item
+):
+    client.force_login(customer)
+    response = client.post(
+        reverse("wishlists:remove", kwargs={"pk": wishlist_item.product.pk})
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+    assert "<html" not in page
+    assert "Your wishlist is empty" in page
+    assert "0 items saved" in page
+    assert reverse("products:catalog") in page
+    assert wishlist_item.product.name not in page
+
+
+def test_wishlist_page_renders_cart_actions_for_available_and_unavailable_products(
+    client, customer, wishlist_item, unavailable_product
+):
+    customer.wishlist.add(unavailable_product)
+
+    client.force_login(customer)
+    response = client.get(reverse("wishlists:detail"))
+
+    assert response.status_code == HTTPStatus.OK
+    page = response.content.decode()
+
+    # For available product: in-stock badge and active Add to Cart HTMX button
+    assert wishlist_item.product.name in page
+    assert reverse("orders:add", kwargs={"pk": wishlist_item.product.pk}) in page
+    assert "Add to cart" in page
+
+    # For unavailable product: out-of-stock badge and disabled Unavailable button
+    assert unavailable_product.name in page
+    assert "Unavailable" in page
+    assert (
+        f'hx-post="{reverse("orders:add", kwargs={"pk": unavailable_product.pk})}"'
+        not in page
+    )
+
+
+def test_cart_addition_from_wishlist_integration(client, customer, wishlist_item):
+    client.force_login(customer)
+
+    # Post to orders:add using product pk from wishlist item
+    response = client.post(
+        reverse("orders:add", kwargs={"pk": wishlist_item.product.pk})
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    from orders.models import Cart
+
+    cart = Cart.for_user(customer)
+    assert cart.items.filter(product=wishlist_item.product).exists()
+    assert cart.items.get(product=wishlist_item.product).quantity == 1
+
+
+def test_cannot_add_unavailable_product_to_cart(client, customer, unavailable_product):
+    client.force_login(customer)
+
+    response = client.post(reverse("orders:add", kwargs={"pk": unavailable_product.pk}))
+
+    assert response.status_code == HTTPStatus.NOT_FOUND

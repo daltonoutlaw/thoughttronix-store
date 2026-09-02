@@ -34,3 +34,20 @@ class WishlistToggleView(LoginRequiredMixin, View):
             "wishlists/partials/_toggle_button.html",
             {"product": product, "in_wishlist": in_wishlist},
         )
+
+
+class WishlistRemoveView(LoginRequiredMixin, View):
+    """HTMX: remove a product from the customer's wishlist and re-render contents."""
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        wishlist = Wishlist.for_user(request.user)
+        wishlist.remove(product)
+        items = wishlist.items.select_related("product", "product__category").order_by(
+            "-added_at"
+        )
+        return render(
+            request,
+            "wishlists/partials/_wishlist_contents.html",
+            {"wishlist": wishlist, "items": items},
+        )

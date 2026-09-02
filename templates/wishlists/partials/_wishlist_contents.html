@@ -1,0 +1,60 @@
+{% load cart_extras humanize static %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-3xl font-bold">My Wishlist</h1>
+    <p class="mt-1 text-sm opacity-60">
+      {{ items|length }} item{{ items|length|pluralize }} saved
+    </p>
+  </div>
+</div>
+
+{% if items %}
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for item in items %}
+      <div class="card bg-base-100 shadow-md transition-shadow hover:shadow-xl">
+        <figure>
+          <a href="{{ item.product.get_absolute_url }}">
+            <img src="{% static item.product.category.placeholder_image %}" alt="{{ item.product.name }}" />
+          </a>
+        </figure>
+        <div class="card-body">
+          <h2 class="card-title">
+            <a href="{{ item.product.get_absolute_url }}" class="link-hover">{{ item.product.name }}</a>
+          </h2>
+          <div class="flex flex-wrap gap-2">
+            <span class="badge badge-outline">{{ item.product.category.name }}</span>
+            {% if item.product.is_available %}
+              <span class="badge badge-success badge-outline">In stock</span>
+            {% else %}
+              <span class="badge badge-warning badge-outline">Unavailable</span>
+            {% endif %}
+          </div>
+          {% if item.product.tagline %}
+            <p class="text-sm italic opacity-70">{{ item.product.tagline }}</p>
+          {% endif %}
+          <div class="card-actions items-center justify-between mt-4">
+            <p class="text-lg font-semibold text-primary">${{ item.product.price|intcomma }}</p>
+            <div class="flex items-center gap-2">
+              {% include "orders/partials/_add_button.html" with product=item.product in_cart=cart_quantities|quantity_of:item.product.pk %}
+              <button
+                class="btn btn-ghost btn-sm text-error"
+                hx-post="{% url 'wishlists:remove' item.product.pk %}"
+                hx-target="#wishlist-contents">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="py-16 text-center">
+    <p class="text-5xl">❤️</p>
+    <p class="mt-4 text-xl font-semibold">Your wishlist is empty</p>
+    <p class="mt-2 opacity-70">Save items you want to keep track of or buy later.</p>
+    <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-sm mt-6">
+      Browse the catalog
+    </a>
+  </div>
+{% endif %}
