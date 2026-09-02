@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Two-Factor Verification — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-sm">
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-2xl">🛡️</span>
+          <h1 class="card-title text-2xl">Two-Factor Auth</h1>
+        </div>
+        <p class="text-sm opacity-70">
+          Enter the 6-digit code from your authenticator app, or a backup recovery code to sign in.
+        </p>
+
+        <form method="post" class="mt-4 space-y-4">
+          {% csrf_token %}
+
+          {% for error in form.non_field_errors %}
+            <div class="alert alert-error text-sm" role="alert"><span>{{ error }}</span></div>
+          {% endfor %}
+
+          <div>
+            <label class="label mb-1" for="{{ form.code.id_for_label }}">
+              {{ form.code.label }}
+            </label>
+            {{ form.code }}
+            {% for error in form.code.errors %}
+              <p class="mt-1 text-sm text-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div class="pt-2 space-y-2">
+            <button type="submit" class="btn btn-primary w-full">
+              Verify & Sign in
+            </button>
+            <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-sm w-full">
+              Back to sign in
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

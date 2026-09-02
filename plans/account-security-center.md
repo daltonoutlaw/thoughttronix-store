@@ -62,13 +62,13 @@ Self-service TOTP Two-Factor Authentication management within the Security Cente
 
 ### Acceptance criteria
 
-- [ ] Initiating 2FA setup generates a standard TOTP secret and renders an inline SVG QR code alongside a manual entry key.
-- [ ] Submitting an invalid or expired 6-digit TOTP code prevents activation and shows an inline validation error.
-- [ ] Submitting a valid 6-digit TOTP code marks 2FA as active and redirects to the backup recovery codes view.
-- [ ] 8–10 single-use backup recovery codes are generated, displayed in plaintext for immediate backup, and stored securely as hashes.
-- [ ] Customers can regenerate backup recovery codes by confirming their current password, which immediately invalidates all prior backup codes.
-- [ ] Customers can disable 2FA by providing their current password; deactivation removes the TOTP device and purges existing backup codes.
-- [ ] Automated unit and integration tests verify QR generation, TOTP time-step validation, code hashing, regeneration, and deactivation.
+- [x] Initiating 2FA setup generates a standard TOTP secret and renders an inline SVG QR code alongside a manual entry key.
+- [x] Submitting an invalid or expired 6-digit TOTP code prevents activation and shows an inline validation error.
+- [x] Submitting a valid 6-digit TOTP code marks 2FA as active and redirects to the backup recovery codes view.
+- [x] 8–10 single-use backup recovery codes are generated, displayed in plaintext for immediate backup, and stored securely as hashes.
+- [x] Customers can regenerate backup recovery codes by confirming their current password, which immediately invalidates all prior backup codes.
+- [x] Customers can disable 2FA by providing their current password; deactivation removes the TOTP device and purges existing backup codes.
+- [x] Automated unit and integration tests verify QR generation, TOTP time-step validation, code hashing, regeneration, and deactivation.
 
 ---
 
@@ -82,13 +82,13 @@ A two-step sign-in flow that enforces secondary verification for accounts with a
 
 ### Acceptance criteria
 
-- [ ] Signing in with valid credentials on a 2FA-enabled account redirects to the 2FA challenge view (`/accounts/login/2fa/`).
-- [ ] Unauthenticated requests directly accessing the 2FA challenge view are redirected back to the login page.
-- [ ] Submitting a valid 6-digit TOTP code completes the login and establishes a fully authenticated session.
-- [ ] Submitting a valid backup recovery code completes the login and permanently invalidates that specific code.
-- [ ] Attempting to reuse a previously consumed backup recovery code fails.
-- [ ] Failed attempts on login and 2FA challenge views are rate-limited, locking out further attempts after the configured threshold.
-- [ ] Automated tests cover normal login (non-2FA), staged 2FA challenge redirect, TOTP validation, backup code consumption, and rate limiter enforcement.
+- [x] Signing in with valid credentials on a 2FA-enabled account redirects to the 2FA challenge view (`/accounts/login/2fa/`).
+- [x] Unauthenticated requests directly accessing the 2FA challenge view are redirected back to the login page.
+- [x] Submitting a valid 6-digit TOTP code completes the login and establishes a fully authenticated session.
+- [x] Submitting a valid backup recovery code completes the login and permanently invalidates that specific code.
+- [x] Attempting to reuse a previously consumed backup recovery code fails.
+- [x] Failed attempts on login and 2FA challenge views are rate-limited, locking out further attempts after the configured threshold.
+- [x] Automated tests cover normal login (non-2FA), staged 2FA challenge redirect, TOTP validation, backup code consumption, and rate limiter enforcement.
 
 ---
 
@@ -102,13 +102,13 @@ Middleware-driven session and device management. A dedicated middleware tracks a
 
 ### Acceptance criteria
 
-- [ ] Every authenticated request updates or creates a `UserSession` record with current IP, device type, and timestamp.
-- [ ] The Sessions view in the Security Center lists all active sessions with device details, IP address, and relative last active time.
-- [ ] The customer's current session is clearly tagged with a "Current Session" badge and cannot be revoked via the single-item revocation button.
-- [ ] Clicking "Revoke" on a specific secondary session deletes its session record and invalidates the session in Django session storage.
-- [ ] Clicking "Sign out all other sessions" revokes all non-current sessions in a single operation.
-- [ ] Any revoked session encountering the application is immediately forced to sign in again.
-- [ ] Automated tests verify middleware tracking, session listing, single revocation, bulk revocation, and session invalidation.
+- [x] Every authenticated request updates or creates a `UserSession` record with current IP, device type, and timestamp.
+- [x] The Sessions view in the Security Center lists all active sessions with device details, IP address, and relative last active time.
+- [x] The customer's current session is clearly tagged with a "Current Session" badge and cannot be revoked via the single-item revocation button.
+- [x] Clicking "Revoke" on a specific secondary session deletes its session record and invalidates the session in Django session storage.
+- [x] Clicking "Sign out all other sessions" revokes all non-current sessions in a single operation.
+- [x] Any revoked session encountering the application is immediately forced to sign in again.
+- [x] Automated tests verify middleware tracking, session listing, single revocation, bulk revocation, and session invalidation.
 
 ---
 
@@ -122,8 +122,8 @@ A unified security event audit logging system and transactional alert pipeline. 
 
 ### Acceptance criteria
 
-- [ ] Security events are automatically logged with timestamp, event type, IP address, and device metadata across all auth actions.
-- [ ] Security Center provides a chronological activity log view (`/accounts/security/activity/`) displaying recent events with appropriate icons and timestamps.
-- [ ] Critical events (2FA activation/deactivation, password changes, new device logins) trigger immediate transactional email alerts to the user's email address.
-- [ ] Email notifications provide clear context on the event and guidance on securing the account if the action was unexpected.
-- [ ] Automated tests verify event creation across all relevant views and confirm transactional email triggers for critical event types.
+- [x] Security events are automatically logged with timestamp, event type, IP address, and device metadata across all auth actions.
+- [x] Security Center provides a chronological activity log view (`/accounts/security/activity/`) displaying recent events with appropriate icons and timestamps.
+- [x] Critical events (2FA activation/deactivation, password changes, new device logins) trigger immediate transactional email alerts to the user's email address.
+- [x] Email notifications provide clear context on the event and guidance on securing the account if the action was unexpected.
+- [x] Automated tests verify event creation across all relevant views and confirm transactional email triggers for critical event types.

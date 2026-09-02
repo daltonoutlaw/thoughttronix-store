@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Active Sessions & Devices — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <a href="{% url 'accounts:security_center' %}" class="link link-hover text-sm opacity-70">
+          ← Back to Security Center
+        </a>
+        <h1 class="text-3xl font-bold mt-2">Active Sessions & Devices</h1>
+        <p class="mt-1 text-sm opacity-70">
+          Review all browser sessions and devices currently logged into your account.
+        </p>
+      </div>
+
+      {% if other_sessions_count > 0 %}
+        <form method="post" action="{% url 'accounts:session_revoke_others' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-error btn-sm self-start sm:self-auto">
+            Sign out all other sessions
+          </button>
+        </form>
+      {% endif %}
+    </div>
+
+    {% if sessions %}
+      <div class="grid gap-4">
+        {% for s in sessions %}
+          <div class="card bg-base-100 shadow-md">
+            <div class="card-body p-5">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="text-3xl p-2 bg-base-200 rounded-lg">
+                    {% if "Mobile" in s.device_type %}
+                      📱
+                    {% elif "Tablet" in s.device_type %}
+                      📱
+                    {% else %}
+                      💻
+                    {% endif %}
+                  </div>
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h2 class="card-title text-base font-semibold">
+                        {{ s.device_type }}
+                      </h2>
+                      {% if s.session_key == current_session_key %}
+                        <span class="badge badge-primary badge-sm font-semibold">
+                          Current Session
+                        </span>
+                      {% endif %}
+                    </div>
+                    <div class="text-xs opacity-75 flex flex-wrap gap-x-4 gap-y-1">
+                      {% if s.ip_address %}
+                        <span><strong>IP:</strong> {{ s.ip_address }}</span>
+                      {% endif %}
+                      <span>
+                        <strong>Last active:</strong>
+                        {{ s.last_activity|naturaltime }}
+                      </span>
+                      <span>
+                        <strong>Signed in:</strong>
+                        {{ s.created_at|date:"M j, Y" }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-end">
+                  {% if s.session_key == current_session_key %}
+                    <span class="text-xs opacity-60 italic">Current device</span>
+                  {% else %}
+                    <form method="post" action="{% url 'accounts:session_revoke' s.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline btn-error btn-xs">
+                        Revoke
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="py-16 text-center">
+        <p class="text-5xl">💻</p>
+        <p class="mt-4 text-xl font-semibold">No active sessions found</p>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

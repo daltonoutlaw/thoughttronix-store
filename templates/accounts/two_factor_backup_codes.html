@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Backup Recovery Codes — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-2xl space-y-6">
+    <div>
+      <a href="{% url 'accounts:security_center' %}" class="link link-hover text-sm opacity-70">
+        ← Back to Security Center
+      </a>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h1 class="card-title text-2xl">Backup Recovery Codes</h1>
+        <p class="text-sm opacity-70">
+          Recovery codes grant emergency access to your account if you lose access to your primary authenticator device.
+        </p>
+
+        {% if raw_codes %}
+          <div class="alert alert-warning my-4 text-sm" role="alert">
+            <span>
+              <strong>Important:</strong> Save these backup codes now. For your security, this is the only time they will be displayed in plaintext.
+            </span>
+          </div>
+
+          <div class="p-6 bg-base-200 rounded-box border border-base-300 space-y-4">
+            <h2 class="text-sm font-semibold uppercase tracking-wider opacity-75">
+              Your One-Time Recovery Codes
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-center text-sm font-bold tracking-wider">
+              {% for code in raw_codes %}
+                <div class="p-2 bg-base-100 rounded shadow-sm border border-base-300 select-all">
+                  {{ code }}
+                </div>
+              {% endfor %}
+            </div>
+            <p class="text-xs opacity-70">
+              • Each code can only be used once.<br>
+              • Keep them stored in a password manager or secure offline location.
+            </p>
+          </div>
+
+          <div class="pt-4 flex flex-wrap gap-3">
+            <a href="{% url 'accounts:security_center' %}" class="btn btn-primary flex-1">
+              Done — Back to Security Center
+            </a>
+          </div>
+        {% else %}
+          <div class="mt-4 p-4 bg-base-200 rounded-box flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-sm">Active Recovery Codes</p>
+              <p class="text-xs opacity-70">
+                You have <span class="font-bold text-base-content">{{ active_codes_count }}</span> unused backup codes remaining.
+              </p>
+            </div>
+            <span class="badge badge-success">{{ active_codes_count }} Available</span>
+          </div>
+
+          <div class="divider my-4">Regenerate Codes</div>
+
+          <div class="space-y-3">
+            <h2 class="text-md font-semibold">Generate New Recovery Codes</h2>
+            <p class="text-sm opacity-70">
+              If you have lost your recovery codes or suspect they were exposed, confirm your current password below to generate a fresh set. All previous backup codes will be immediately invalidated.
+            </p>
+
+            <form method="post" class="space-y-4 mt-2">
+              {% csrf_token %}
+
+              {% for error in form.non_field_errors %}
+                <div class="alert alert-error text-sm" role="alert"><span>{{ error }}</span></div>
+              {% endfor %}
+
+              <div>
+                <label class="label mb-1" for="{{ form.password.id_for_label }}">
+                  {{ form.password.label }}
+                </label>
+                {{ form.password }}
+                {% for error in form.password.errors %}
+                  <p class="mt-1 text-sm text-error">{{ error }}</p>
+                {% endfor %}
+              </div>
+
+              <div class="pt-2 flex gap-3">
+                <button type="submit" class="btn btn-warning flex-1">
+                  Regenerate Backup Codes
+                </button>
+                <a href="{% url 'accounts:security_center' %}" class="btn btn-ghost">
+                  Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

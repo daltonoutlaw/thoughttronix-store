@@ -16,7 +16,9 @@ from products.models import Category, Product, Tag
 @pytest.fixture
 def customer(db):
     return get_user_model().objects.create_user(
-        username="customer", password="customer123"
+        username="customer",
+        password="customer123",
+        email="customer@thoughttronix.example",
     )
 
 

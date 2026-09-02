@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Set Up Two-Factor Authentication — The ThoughtTronix Store{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-2xl">
+    <div class="mb-4">
+      <a href="{% url 'accounts:security_center' %}" class="link link-hover text-sm opacity-70">
+        ← Back to Security Center
+      </a>
+    </div>
+
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <h1 class="card-title text-2xl">Set Up Two-Factor Authentication</h1>
+        <p class="text-sm opacity-70">
+          Enhance your account security by requiring a 6-digit verification code from your authenticator app each time you sign in.
+        </p>
+
+        <div class="divider my-2"></div>
+
+        <div class="grid gap-8 md:grid-cols-2 items-center">
+          <!-- Step 1: QR Code & Manual Secret -->
+          <div class="space-y-4 text-center md:text-left">
+            <h2 class="text-sm font-semibold uppercase tracking-wider opacity-75">
+              Step 1: Scan QR code
+            </h2>
+            <div class="flex justify-center md:justify-start">
+              <div class="p-3 bg-white rounded-xl shadow-inner inline-block">
+                <div class="w-48 h-48 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
+                  {{ qr_svg|safe }}
+                </div>
+              </div>
+            </div>
+            <div class="text-xs opacity-75">
+              <p class="font-medium">Can't scan the QR code?</p>
+              <p class="mt-1">Enter this key manually into your app:</p>
+              <code class="mt-1 block p-2 bg-base-200 rounded font-mono text-xs select-all text-center tracking-wider font-semibold">
+                {{ secret_key_formatted }}
+              </code>
+            </div>
+          </div>
+
+          <!-- Step 2: Verification Code -->
+          <div class="space-y-4">
+            <h2 class="text-sm font-semibold uppercase tracking-wider opacity-75">
+              Step 2: Verify code
+            </h2>
+            <p class="text-sm opacity-80">
+              Enter the 6-digit code shown in your authenticator app to complete setup and activate 2FA.
+            </p>
+
+            <form method="post" action="{% url 'accounts:two_factor_verify' %}" class="space-y-4">
+              {% csrf_token %}
+
+              {% for error in form.non_field_errors %}
+                <div class="alert alert-error text-sm" role="alert"><span>{{ error }}</span></div>
+              {% endfor %}
+
+              <div>
+                <label class="label mb-1" for="{{ form.code.id_for_label }}">
+                  {{ form.code.label }}
+                </label>
+                {{ form.code }}
+                {% for error in form.code.errors %}
+                  <p class="mt-1 text-sm text-error">{{ error }}</p>
+                {% endfor %}
+              </div>
+
+              <div class="pt-2 flex flex-col gap-2">
+                <button type="submit" class="btn btn-primary w-full">
+                  Verify & Activate 2FA
+                </button>
+                <a href="{% url 'accounts:security_center' %}" class="btn btn-ghost btn-sm w-full">
+                  Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

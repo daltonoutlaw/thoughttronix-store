@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 
 {% block title %}Security Center — The ThoughtTronix Store{% endblock %}
 
@@ -57,9 +58,18 @@
           </p>
           <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-end">
             {% if two_factor_enabled %}
-              <span class="text-xs opacity-70 py-1">Protected via TOTP</span>
+              <div class="flex w-full gap-2">
+                <a href="{% url 'accounts:two_factor_backup_codes' %}" class="btn btn-outline btn-sm flex-1">
+                  Recovery Codes
+                </a>
+                <a href="{% url 'accounts:two_factor_disable' %}" class="btn btn-ghost btn-sm text-error">
+                  Disable
+                </a>
+              </div>
             {% else %}
-              <span class="text-xs opacity-70 py-1">2FA setup available soon</span>
+              <a href="{% url 'accounts:two_factor_setup' %}" class="btn btn-primary btn-sm w-full">
+                Set Up 2FA
+              </a>
             {% endif %}
           </div>
         </div>
@@ -77,9 +87,65 @@
             Devices and browser sessions currently authenticated with access to your account.
           </p>
           <div class="card-actions mt-4 pt-4 border-t border-base-200 justify-end">
-            <span class="text-xs opacity-70 py-1">Current device active</span>
+            <a href="{% url 'accounts:session_list' %}" class="btn btn-outline btn-sm w-full">
+              Manage Sessions
+            </a>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Recent Security Activity Section -->
+    <div class="card bg-base-100 shadow-md">
+      <div class="card-body">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="card-title text-xl">Recent Security Activity</h2>
+            <p class="text-sm opacity-70">
+              Audit trail of recent authentication and account security events.
+            </p>
+          </div>
+          <a href="{% url 'accounts:security_activity' %}" class="btn btn-ghost btn-sm">
+            View Full Log →
+          </a>
+        </div>
+
+        {% if recent_events %}
+          <div class="divide-y divide-base-200 mt-4">
+            {% for event in recent_events %}
+              <div class="py-3 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
+                <div class="flex items-center gap-3">
+                  <span class="text-xl">
+                    {% if "LOGIN_FAILED" in event.event_type %}
+                      ⚠️
+                    {% elif "LOGIN_SUCCESS" in event.event_type %}
+                      🔓
+                    {% elif "PASSWORD" in event.event_type %}
+                      🔑
+                    {% elif "TWO_FACTOR" in event.event_type or "BACKUP" in event.event_type %}
+                      🛡️
+                    {% elif "SESSION" in event.event_type %}
+                      💻
+                    {% else %}
+                      📝
+                    {% endif %}
+                  </span>
+                  <div>
+                    <p class="text-sm font-semibold">{{ event.get_event_type_display }}</p>
+                    <p class="text-xs opacity-60">
+                      {{ event.device_type }}{% if event.ip_address %} • {{ event.ip_address }}{% endif %}
+                    </p>
+                  </div>
+                </div>
+                <span class="text-xs opacity-70 whitespace-nowrap">
+                  {{ event.created_at|naturaltime }}
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-sm opacity-60 mt-4">No recent security events recorded.</p>
+        {% endif %}
       </div>
     </div>
 
