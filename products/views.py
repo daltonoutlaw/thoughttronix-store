@@ -70,6 +70,18 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
     queryset = Product.objects.select_related("category").prefetch_related("tags")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            from wishlists.models import Wishlist
+
+            context["in_wishlist"] = Wishlist.for_user(self.request.user).contains(
+                self.object
+            )
+        else:
+            context["in_wishlist"] = False
+        return context
+
 
 # --- The back office --------------------------------------------------------
 #

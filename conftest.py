@@ -11,6 +11,7 @@ from django.contrib.auth import get_user_model
 
 from orders.models import Cart, CartItem
 from products.models import Category, Product, Tag
+from wishlists.models import Wishlist, WishlistItem
 
 
 @pytest.fixture
@@ -74,3 +75,13 @@ def cart(customer):
 @pytest.fixture
 def cart_item(cart, product):
     return CartItem.objects.create(cart=cart, product=product, quantity=2)
+
+
+@pytest.fixture
+def wishlist(customer):
+    return Wishlist.for_user(customer)
+
+
+@pytest.fixture
+def wishlist_item(wishlist, product):
+    return WishlistItem.objects.create(wishlist=wishlist, product=product)

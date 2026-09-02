@@ -1,0 +1,1 @@
+"""The wishlists application."""

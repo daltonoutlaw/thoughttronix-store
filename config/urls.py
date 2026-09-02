@@ -13,6 +13,7 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("", include("dashboard.urls")),
     path("", include("orders.urls")),
+    path("", include("wishlists.urls")),
     path(
         "safety/",
         TemplateView.as_view(template_name="pages/recall_notices.html"),

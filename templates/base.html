@@ -26,6 +26,7 @@
               </a>
             {% endif %}
             <a href="{% url 'orders:history' %}" class="btn btn-ghost btn-sm">Orders</a>
+            <a href="{% url 'wishlists:detail' %}" class="btn btn-ghost btn-sm">Wishlist</a>
             <a href="{% url 'accounts:address_list' %}" class="btn btn-ghost btn-sm">Addresses</a>
             <a href="{% url 'accounts:security_center' %}" class="btn btn-ghost btn-sm">Security Center</a>
             {% include "orders/partials/_cart_badge.html" %}

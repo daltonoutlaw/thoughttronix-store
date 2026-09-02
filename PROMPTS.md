@@ -30,6 +30,25 @@ Each entry has this shape:
 
 ---
 
+## 2026-09-02 — Customer Wishlist Phase 2: Dedicated Wishlist Page & Storefront Navigation
+
+### Prompts
+1. `/implement @prd/customer-wishlist.md d @plans/customer-wishlist.md md implement phase`
+   - *Phase Selection:* `(Recommended) Phase 2: Dedicated Wishlist Page & Storefront Navigation`
+2. `if i use the /implement command, will it use the skill located in .agents or .claude`
+3. `/implement @prd/customer-wishlist.md d @plans/customer-wishlist.md md implement phase`
+4. `approved`
+5. `yes`
+6. `/implement @prd/wishlist.md @plans/wishlist.md implement phase 2`
+7. `backtrack. I approve the last phase. proceed with the next step for that. Then i will review this`
+
+### Summary
+- **Outcome:** Completed Phase 2 of the Customer Wishlist feature. Added the "Wishlist" navigation link to the main navbar for authenticated customers in `templates/base.html`. Implemented and verified test coverage for the dedicated `/wishlist/` page, including customer authentication enforcement, item detail rendering (image, title link, formatted price, stock status badge), empty state rendering with a call-to-action catalog link, and strict cross-customer data isolation. All 254 tests passed and linting/formatting checks passed cleanly.
+- **Deviations:** None. Followed the TDD process with approved candidate behaviors for navigation and empty state verification.
+- **Sideways:** None. Encountered a minor import sorting issue reported by `ruff check` which was automatically corrected with `ruff check --fix`.
+
+---
+
 ## 2026-09-01 — Account Security Center Design & PRD Generation
 
 ### Prompts
