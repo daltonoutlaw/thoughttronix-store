@@ -20,6 +20,11 @@ class WishlistDetailView(LoginRequiredMixin, View):
             "wishlists/detail.html",
             {"wishlist": wishlist, "items": items},
         )
+        item = get_object_or_404(
+        WishlistItem,
+        pk=pk,
+        wishlist__user=request.user,
+)
 
 
 class WishlistToggleView(LoginRequiredMixin, View):
